@@ -32,4 +32,16 @@ def test_custom_exception_not_error(test_client):
     response = test_client.get("/custom-items/item1")
     assert response.status_code == 200
     data = response.json()
-    assert "item1" in data["name"]
+    assert "item1" == data["item_id"]
+
+def test_validation_error(test_client):
+    """검증 에러 커스터마이징 테스트"""
+    response = test_client.post(
+        "/validated-items/",
+        json={"name": "책", "price": "invalid"}  # 잘못된 타입
+    )
+    assert response.status_code == 422
+    data = response.json()
+    assert data["error"] == "ValidationError"
+    assert "details" in data
+    assert len(data["details"]) > 0
