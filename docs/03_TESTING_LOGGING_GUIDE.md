@@ -801,23 +801,23 @@ def get_logger(name: str):
 ```python
 # app/main.py
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from app.logging_config import setup_logging, get_logger
 
 # 로깅 설정
 setup_logging()
 logger = get_logger(__name__)
 
-app = FastAPI()
-
-@app.on_event("startup")
-async def startup_event():
-    """앱 시작 시 실행"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """애플리케이션 생명주기 관리"""
+    # startup
     logger.info("애플리케이션 시작")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """앱 종료 시 실행"""
+    yield
+    # shutdown
     logger.info("애플리케이션 종료")
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def root():
