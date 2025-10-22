@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "kaira-fastapi-poetry/src"
+    ]
+}
