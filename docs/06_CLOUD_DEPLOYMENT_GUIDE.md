@@ -156,9 +156,8 @@ sudo sh get-docker.sh
 # 현재 사용자를 docker 그룹에 추가
 sudo usermod -aG docker $USER
 
-# docker-compose 설치
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+# Docker Compose v2는 Docker Desktop에 포함되어 있음
+# 별도 설치 불필요
 
 # 재접속 (docker 그룹 권한 적용)
 exit
@@ -166,7 +165,7 @@ ssh -i ~/Downloads/kaira-key.pem ubuntu@<EC2_PUBLIC_IP>
 
 # 설치 확인
 docker --version
-docker-compose --version
+docker compose version
 ```
 
 ### 6.2.5 코드 배포

@@ -89,6 +89,12 @@ poetry add --group dev pytest     # 개발용
 - `poetry shell` 한 번으로 활성화
 - 프로젝트별 독립적인 환경
 
+✅ **Poetry 2.x의 향상된 성능**
+
+- 더 빠른 의존성 해결
+- 향상된 안정성 및 오류 처리
+- 최신 Python 버전 지원 강화
+
 ---
 
 ## 2.2 Poetry 설치
@@ -116,7 +122,7 @@ poetry --version
 **예상 결과**:
 
 ```
-Poetry (version 1.8.0)
+Poetry (version 2.2.1)
 ```
 
 ### Poetry 설정 (선택)

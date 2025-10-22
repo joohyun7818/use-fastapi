@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from pydantic import BaseModel
+from fastapi import Header 
 
 app = FastAPI(
     title="Kaira Server",
@@ -9,6 +11,12 @@ app = FastAPI(
 )
 
 
+class Item(BaseModel):
+    name: str
+    price: float
+    is_offer: bool = False
+
+# ---------------------------- GET -------------------------------
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -35,6 +43,22 @@ def get_item(item_id:int):
         "name": f"Item {item_id}",
         "description": f"This is item number {item_id}"
     }
+
+@app.get("/headers/")
+async def read_headers(
+    user_agent:str = Header(None),
+    x_token:str = Header(None)
+):
+    return {
+        "User-Agent": user_agent,
+        "X-Token": x_token
+    }
+
+
+# ----------------------------- POST -------------------------------
+@app.post("/items/")
+async def create_item(item: Item):
+    return {"item": item, "message": "Item created"}
 
 
 #정적 파일 마운트

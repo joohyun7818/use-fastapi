@@ -294,7 +294,7 @@ pydantic = "^2.0"
 """
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from dotenv import load_dotenv
 
 # 환경 변수 로드
@@ -310,7 +310,7 @@ DATABASE_URL = os.getenv(
 engine = create_engine(
     DATABASE_URL,
     echo=True,  # SQL 쿼리 출력 (개발 중만 사용)
-    future=True  # SQLAlchemy 2.0 호환
+    # future=True  # SQLAlchemy 2.0에서는 기본값
 )
 
 # 세션 팩토리 생성
@@ -322,7 +322,8 @@ SessionLocal = sessionmaker(
 )
 
 # 모든 데이터베이스 모델의 기본 클래스
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 
 def get_db():

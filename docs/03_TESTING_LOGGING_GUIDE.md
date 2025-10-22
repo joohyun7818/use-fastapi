@@ -2,19 +2,19 @@
 
 ## 📚 3단계 목차
 
-| 챕터 | 주제 | 예상 시간 |
-|------|------|---------|
-| [3.1](#31-학습-목표) | 학습 목표 | - |
-| [3.2](#32-pytest-이해하기) | Pytest 이해하기 | 30분 |
-| [3.3](#33-fastapi-testclient) | FastAPI TestClient | 45분 |
-| [3.4](#34-테스트-코드-작성) | 테스트 코드 작성 | 1시간 |
-| [3.5](#35-에러-처리) | 에러 처리 | 45분 |
-| [3.6](#36-로깅-시스템) | 로깅 시스템 | 1시간 |
-| [3.7](#37-환경-변수-관리) | 환경 변수 관리 | 30분 |
-| [3.8](#38-테스트-커버리지) | 테스트 커버리지 | 45분 |
-| [3.9](#39-실전-예제) | 실전 예제 | 1시간 |
-| [3.10](#310-문제-해결) | 문제 해결 | 30분 |
-| [3.11](#311-체크리스트) | 체크리스트 | - |
+| 챕터                       | 주제               | 예상 시간 |
+| -------------------------- | ------------------ | --------- |
+| [3.1](#31-학습-목표)          | 학습 목표          | -         |
+| [3.2](#32-pytest-이해하기)    | Pytest 이해하기    | 30분      |
+| [3.3](#33-fastapi-testclient) | FastAPI TestClient | 45분      |
+| [3.4](#34-테스트-코드-작성)   | 테스트 코드 작성   | 1시간     |
+| [3.5](#35-에러-처리)          | 에러 처리          | 45분      |
+| [3.6](#36-로깅-시스템)        | 로깅 시스템        | 1시간     |
+| [3.7](#37-환경-변수-관리)     | 환경 변수 관리     | 30분      |
+| [3.8](#38-테스트-커버리지)    | 테스트 커버리지    | 45분      |
+| [3.9](#39-실전-예제)          | 실전 예제          | 1시간     |
+| [3.10](#310-문제-해결)        | 문제 해결          | 30분      |
+| [3.11](#311-체크리스트)       | 체크리스트         | -         |
 
 ---
 
@@ -23,26 +23,31 @@
 이 단계를 완료하면 다음을 할 수 있습니다:
 
 ✅ **테스트 프레임워크**
+
 - pytest 기본 사용법 이해
 - FastAPI TestClient로 API 테스트 작성
 - Fixture와 Parametrize 활용
 
 ✅ **에러 처리**
+
 - HTTPException으로 표준 에러 반환
 - 커스텀 예외 핸들러 구현
 - 검증 에러 커스터마이징
 
 ✅ **로깅**
+
 - Python logging 모듈 활용
 - 요청/응답 로깅 구현
 - 로그 레벨과 포맷 관리
 
 ✅ **설정 관리**
+
 - pydantic-settings로 환경 변수 관리
 - .env 파일 활용
 - 개발/운영 환경 분리
 
 ✅ **테스트 커버리지**
+
 - pytest-cov로 커버리지 측정
 - 테스트 리포트 생성
 
@@ -57,6 +62,7 @@
 Pytest는 Python에서 가장 널리 사용되는 테스트 프레임워크입니다.
 
 **주요 특징**:
+
 - 간결한 문법 (`assert` 문만으로 테스트)
 - 강력한 fixture 시스템
 - 플러그인 생태계 풍부
@@ -77,6 +83,7 @@ pip install pytest pytest-cov pytest-asyncio
 ```
 
 **설치 확인**:
+
 ```bash
 pytest --version
 ```
@@ -84,7 +91,8 @@ pytest --version
 ### 3.2.3 첫 번째 테스트 작성
 
 **테스트 파일 구조**:
-```
+
+```text
 kaira-server/
 ├── app/
 │   └── main.py
@@ -94,6 +102,7 @@ kaira-server/
 ```
 
 **간단한 테스트 예제** (`tests/test_main.py`):
+
 ```python
 # tests/test_main.py
 def test_addition():
@@ -109,6 +118,7 @@ def test_string():
 ```
 
 **테스트 실행**:
+
 ```bash
 # 모든 테스트 실행
 pytest
@@ -128,9 +138,22 @@ pytest --lf
 
 ### 3.2.4 Pytest Fixture
 
-Fixture는 테스트에 필요한 데이터나 환경을 준비하는 함수입니다.
+Fixture는 **테스트 실행 전에 필요한 준비 작업을 캡슐화한 함수**입니다. 데이터 생성, DB 연결, 가짜 클라이언트 구성처럼 테스트마다 반복되는 절차를 한 곳에 모아두고 재사용할 수 있게 해줍니다.
+
+#### 작동 방식 요약
+
+- 테스트 함수(또는 다른 fixture)가 파라미터 이름으로 fixture를 요청하면 pytest가 자동으로 실행하고 반환 값을 주입합니다.
+- `@pytest.fixture` 데코레이터만 붙이면 어디에 정의되었든 동작하지만, `conftest.py`에 있으면 같은 디렉터리 및 하위 테스트에서 import 없이 공유됩니다.
+- 이름이 같다면 더 좁은 위치(예: 특정 테스트 모듈)의 fixture가 우선 적용되어 손쉽게 override할 수 있습니다.
+
+#### 왜 fixture가 필요한가?
+
+- 반복되는 설정/정리 코드를 깔끔하게 분리해 테스트를 짧고 읽기 쉽게 유지합니다.
+- 테스트 간 상태 공유 범위를 `scope`로 조절해 불필요한 재초기화를 줄이고 실행 시간을 최적화합니다.
+- 한 곳에서 환경을 구성하므로 테스트 전반의 일관성을 지킬 수 있고, 환경이 바뀌어도 fixture만 수정하면 됩니다.
 
 **기본 Fixture**:
+
 ```python
 # tests/test_fixtures.py
 import pytest
@@ -146,7 +169,10 @@ def test_sample_data(sample_data):
     assert sample_data["age"] == 30
 ```
 
+위 예제처럼 테스트 함수의 인자에 `sample_data`를 적기만 하면 pytest가 해당 fixture를 실행해 반환 값을 넣어 줍니다. 테스트 파일 안에 fixture를 두면 그 파일에서만 사용할 수 있고, 여러 테스트 파일에서 공유하고 싶다면 `tests/conftest.py`에 정의하면 됩니다.
+
 **Fixture Scope**:
+
 ```python
 # tests/conftest.py
 import pytest
@@ -178,6 +204,7 @@ def session_fixture():
 여러 입력값으로 같은 테스트를 실행할 수 있습니다.
 
 **기본 예제**:
+
 ```python
 # tests/test_parametrize.py
 import pytest
@@ -193,6 +220,7 @@ def test_eval(input, expected):
 ```
 
 **여러 매개변수 조합**:
+
 ```python
 @pytest.mark.parametrize("x", [0, 1])
 @pytest.mark.parametrize("y", [2, 3])
@@ -210,6 +238,7 @@ def test_combinations(x, y):
 FastAPI의 `TestClient`는 실제 서버 없이 API를 테스트할 수 있게 해줍니다.
 
 **특징**:
+
 - 실제 HTTP 요청 없이 테스트 (메모리 내 실행)
 - 동기식 테스트 작성 가능 (async/await 불필요)
 - 모든 HTTP 메서드 지원 (GET, POST, PUT, DELETE 등)
@@ -218,6 +247,7 @@ FastAPI의 `TestClient`는 실제 서버 없이 API를 테스트할 수 있게 �
 ### 3.3.2 기본 사용법
 
 **간단한 FastAPI 앱** (`app/main.py`):
+
 ```python
 # app/main.py
 from fastapi import FastAPI
@@ -234,6 +264,7 @@ async def read_item(item_id: int):
 ```
 
 **TestClient로 테스트** (`tests/test_main.py`):
+
 ```python
 # tests/test_main.py
 from fastapi.testclient import TestClient
@@ -280,6 +311,7 @@ def test_create_item():
     )
     assert response.status_code == 200
     data = response.json()
+
     assert data["item"]["name"] == "책"
     assert data["item"]["price"] == 15000
     assert data["message"] == "Item created"
@@ -346,7 +378,7 @@ def test_read_root(test_client):
 
 ### 3.4.1 테스트 디렉토리 구조
 
-```
+```text
 kaira-server/
 ├── app/
 │   ├── __init__.py
@@ -371,6 +403,7 @@ kaira-server/
 ### 3.4.2 정적 파일 서빙 테스트
 
 **앱 코드** (`app/main.py`):
+
 ```python
 # app/main.py
 from fastapi import FastAPI
@@ -390,6 +423,7 @@ async def root():
 ```
 
 **테스트 코드** (`tests/test_static.py`):
+
 ```python
 # tests/test_static.py
 from fastapi.testclient import TestClient
@@ -406,7 +440,7 @@ def test_root_endpoint():
 def test_static_html_file():
     """정적 HTML 파일 접근 테스트"""
     response = client.get("/static/index.html")
-    
+  
     # 파일이 존재하면 200, 없으면 404
     if response.status_code == 200:
         assert "text/html" in response.headers["content-type"]
@@ -417,24 +451,81 @@ def test_static_html_file():
 def test_static_css_file():
     """정적 CSS 파일 접근 테스트"""
     response = client.get("/static/style.css")
-    
+  
     if response.status_code == 200:
         assert "text/css" in response.headers["content-type"]
 ```
 
 ### 3.4.3 데이터 검증 테스트
 
+#### Pydantic BaseModel 이해하기
+
+Pydantic은 Python 데이터 검증 및 설정 관리 라이브러리로, FastAPI에서 API 요청/응답 데이터를 안전하게 처리하는 데 필수적입니다. `BaseModel`은 데이터 모델을 정의하고 자동으로 검증/변환하는 역할을 합니다.
+
+**주요 특징**:
+
+- **데이터 검증**: 입력 데이터를 타입과 제약 조건에 맞춰 자동 검증.
+- **타입 변환**: JSON 데이터를 Python 객체로 변환 (예: 문자열 숫자 → `int`/`float`).
+- **직렬화**: Python 객체를 JSON으로 변환.
+- **API 문서 자동 생성**: OpenAPI 스키마에 모델 정보 표시.
+
+**필수 vs 선택 필드 구분**:
+
+- **필수 필드**: 타입 힌트만 지정 (값 없으면 에러).
+
+  ```python
+  name: str  # 필수
+  ```
+
+- **선택 필드**: `Optional` 사용 또는 기본값 제공.
+
+  ```python
+  description: Optional[str] = None  # 선택
+  is_offer: bool = False  # 선택 (기본값)
+  ```
+
+**DTO로서의 역할**:
+
+Pydantic BaseModel은 **DTO(Data Transfer Object)**와 유사합니다. API를 통해 데이터를 주고받을 때 구조화하고 검증하는 "전송 객체" 역할을 합니다. 비즈니스 로직 없이 데이터 형식만 정의합니다.
+
+**ORM Model과의 차이**:
+
+- **Pydantic BaseModel**: API 계층 데이터 검증/직렬화 (DB 무관).
+- **ORM Model** (예: SQLAlchemy): DB 테이블 매핑 및 CRUD 작업.
+
+FastAPI에서는 둘을 함께 사용: Pydantic은 API 스키마, ORM은 DB 모델.
+
+**JSON 요청 시 주의사항**:
+
+JSON으로 데이터를 보낼 때는 표준 형식을 따라야 합니다:
+
+- **불리언**: `true`/`false` (소문자, `True`/`False` 아님).
+- **null 값**: `null` (소문자, `None` 아님).
+- **숫자**: `number` 타입 (Pydantic이 자동 변환).
+- **문자열**: 큰따옴표 (`"`)만 사용.
+- **키 이름**: 모델 필드와 정확히 일치 (대소문자 구분).
+- **추가 필드**: 모델에 없으면 에러 (기본적으로 엄격).
+
+**예시 요청**:
+
+```json
+{"name": "book", "price": 15000, "is_offer": true}  // OK
+{"name": "book", "price": "15000"}                 // 에러 (price 타입 불일치)
+```
+
 **Pydantic 모델** (`app/models.py`):
+
 ```python
 # app/models.py
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 class Item(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
     price: float = Field(..., gt=0)
     quantity: int = Field(default=1, ge=1)
-    
-    @validator('name')
+  
+    @field_validator('name')
+    @classmethod
     def name_must_not_be_empty(cls, v):
         if not v.strip():
             raise ValueError('이름은 공백일 수 없습니다')
@@ -442,6 +533,7 @@ class Item(BaseModel):
 ```
 
 **검증 테스트** (`tests/test_models.py`):
+
 ```python
 # tests/test_models.py
 import pytest
@@ -459,7 +551,7 @@ def test_item_invalid_price():
     """잘못된 가격 검증"""
     with pytest.raises(ValidationError) as exc_info:
         Item(name="책", price=-1000)
-    
+  
     errors = exc_info.value.errors()
     assert any(err['loc'] == ('price',) for err in errors)
 
@@ -467,7 +559,7 @@ def test_item_empty_name():
     """빈 이름 검증"""
     with pytest.raises(ValidationError) as exc_info:
         Item(name="   ", price=1000)
-    
+  
     assert "이름은 공백일 수 없습니다" in str(exc_info.value)
 
 @pytest.mark.parametrize("name,price,should_pass", [
@@ -494,6 +586,7 @@ def test_item_validation(name, price, should_pass):
 ### 3.5.1 HTTPException 사용
 
 **기본 에러 처리** (`app/main.py`):
+
 ```python
 # app/main.py
 from fastapi import FastAPI, HTTPException
@@ -513,6 +606,7 @@ async def get_item(item_id: str):
 ```
 
 **에러 테스트** (`tests/test_errors.py`):
+
 ```python
 # tests/test_errors.py
 from fastapi.testclient import TestClient
@@ -620,7 +714,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "message": error["msg"],
             "type": error["type"]
         })
-    
+  
     return JSONResponse(
         status_code=422,
         content={
@@ -663,6 +757,7 @@ def test_validation_error():
 ### 3.6.1 Python logging 기본
 
 **로깅 설정** (`app/logging_config.py`):
+
 ```python
 # app/logging_config.py
 import logging
@@ -674,11 +769,11 @@ def setup_logging():
     # 로그 디렉토리 생성
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+  
     # 로그 포맷 설정
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
-    
+  
     # 루트 로거 설정
     logging.basicConfig(
         level=logging.INFO,
@@ -691,7 +786,7 @@ def setup_logging():
             logging.FileHandler(log_dir / "app.log", encoding="utf-8")
         ]
     )
-    
+  
     # 특정 로거 레벨 조정
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
@@ -702,6 +797,7 @@ def get_logger(name: str):
 ```
 
 **메인 앱에서 사용** (`app/main.py`):
+
 ```python
 # app/main.py
 from fastapi import FastAPI
@@ -751,24 +847,25 @@ logger = get_logger(__name__)
 
 def demonstrate_log_levels():
     """로그 레벨 예제"""
-    
+  
     # DEBUG: 상세한 디버깅 정보
     logger.debug("디버그 메시지 - 개발 중에만 필요")
-    
+  
     # INFO: 일반 정보
     logger.info("정보 메시지 - 정상 동작 기록")
-    
+  
     # WARNING: 경고 (문제는 아니지만 주의 필요)
     logger.warning("경고 메시지 - 잠재적 문제 발견")
-    
+  
     # ERROR: 에러 (기능 실패)
     logger.error("에러 메시지 - 기능 실행 실패")
-    
+  
     # CRITICAL: 치명적 에러 (앱 중단 위험)
     logger.critical("치명적 에러 - 앱이 계속 실행 불가능")
 ```
 
 **환경별 로그 레벨 설정**:
+
 ```python
 # app/logging_config.py 수정
 import os
@@ -776,14 +873,14 @@ import os
 def setup_logging():
     # 환경 변수로 로그 레벨 결정
     env = os.getenv("ENVIRONMENT", "development")
-    
+  
     if env == "production":
         log_level = logging.WARNING  # 운영: WARNING 이상만
     elif env == "staging":
         log_level = logging.INFO     # 스테이징: INFO 이상
     else:
         log_level = logging.DEBUG    # 개발: 모든 로그
-    
+  
     logging.basicConfig(
         level=log_level,
         # ... 나머지 설정
@@ -804,30 +901,31 @@ async def log_requests(request: Request, call_next):
     """요청/응답 로깅 미들웨어"""
     # 요청 시작 시간
     start_time = time.time()
-    
+  
     # 요청 정보 로깅
     logger.info(f"요청 시작: {request.method} {request.url.path}")
     logger.debug(f"요청 헤더: {dict(request.headers)}")
-    
+  
     # 요청 처리
     response = await call_next(request)
-    
+  
     # 처리 시간 계산
     process_time = time.time() - start_time
-    
+  
     # 응답 정보 로깅
     logger.info(
         f"요청 완료: {request.method} {request.url.path} "
         f"- 상태: {response.status_code} - 시간: {process_time:.3f}초"
     )
-    
+  
     # 응답 헤더에 처리 시간 추가
     response.headers["X-Process-Time"] = str(process_time)
-    
+  
     return response
 ```
 
 **미들웨어 등록** (`app/main.py`):
+
 ```python
 # app/main.py
 from fastapi import FastAPI
@@ -857,9 +955,9 @@ def test_request_logging(caplog):
     """요청 로깅 테스트 (pytest의 caplog fixture 사용)"""
     with caplog.at_level(logging.INFO):
         response = client.get("/")
-        
+      
         assert response.status_code == 200
-        
+      
         # 로그 메시지 확인
         log_messages = [record.message for record in caplog.records]
         assert any("요청 시작" in msg for msg in log_messages)
@@ -868,7 +966,7 @@ def test_request_logging(caplog):
 def test_process_time_header():
     """처리 시간 헤더 테스트"""
     response = client.get("/")
-    
+  
     assert "X-Process-Time" in response.headers
     process_time = float(response.headers["X-Process-Time"])
     assert process_time > 0
@@ -887,6 +985,7 @@ pip install pydantic-settings
 ### 3.7.2 설정 파일 작성
 
 **설정 모델** (`app/config.py`):
+
 ```python
 # app/config.py
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -894,32 +993,32 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     """애플리케이션 설정"""
-    
+  
     # 앱 설정
     app_name: str = "Kaira Static Server"
     debug: bool = False
     environment: str = "development"
-    
+  
     # 서버 설정
     host: str = "0.0.0.0"
     port: int = 8000
-    
+  
     # 정적 파일 경로
     static_dir: str = "kaira-1.0.0"
-    
+  
     # 로그 설정
     log_level: str = "INFO"
     log_file: str = "logs/app.log"
-    
+  
     # 데이터베이스 (향후 사용)
     database_url: str = "sqlite:///./app.db"
-    
+  
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False
     )
-    
+  
     @property
     def static_path(self) -> Path:
         """정적 파일 절대 경로"""
@@ -932,6 +1031,7 @@ settings = Settings()
 ### 3.7.3 .env 파일 작성
 
 **개발 환경** (`.env`):
+
 ```bash
 # .env
 APP_NAME=Kaira Static Server
@@ -950,6 +1050,7 @@ DATABASE_URL=sqlite:///./dev.db
 ```
 
 **운영 환경** (`.env.production`):
+
 ```bash
 # .env.production
 APP_NAME=Kaira Static Server
@@ -970,6 +1071,7 @@ DATABASE_URL=postgresql://user:pass@localhost/kaira
 ### 3.7.4 설정 사용하기
 
 **메인 앱에서 사용** (`app/main.py`):
+
 ```python
 # app/main.py
 from fastapi import FastAPI
@@ -1001,7 +1103,7 @@ async def get_config():
     """현재 설정 확인 (개발 환경에서만)"""
     if not settings.debug:
         return {"error": "Not available in production"}
-    
+  
     return {
         "app_name": settings.app_name,
         "environment": settings.environment,
@@ -1025,10 +1127,10 @@ def test_settings():
     os.environ["ENVIRONMENT"] = "testing"
     os.environ["DEBUG"] = "true"
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-    
+  
     settings = Settings()
     yield settings
-    
+  
     # 정리
     del os.environ["ENVIRONMENT"]
     del os.environ["DEBUG"]
@@ -1064,11 +1166,11 @@ class Settings(BaseSettings):
     """전체 설정"""
     app_name: str = "Kaira Static Server"
     debug: bool = False
-    
+  
     # 중첩 설정
     database: DatabaseSettings = DatabaseSettings()
     logging: LoggingSettings = LoggingSettings()
-    
+  
     model_config = SettingsConfigDict(
         env_file=".env",
         env_nested_delimiter="__"  # DATABASE__URL 형식 지원
@@ -1078,6 +1180,7 @@ settings = Settings()
 ```
 
 **.env 파일 예시**:
+
 ```bash
 # .env
 APP_NAME=Kaira Static Server
@@ -1100,6 +1203,7 @@ LOGGING__FILE=logs/app.log
 ### 3.8.1 pytest-cov 사용
 
 **커버리지 측정**:
+
 ```bash
 # 커버리지 리포트와 함께 테스트 실행
 pytest --cov=app --cov-report=html --cov-report=term
@@ -1109,7 +1213,8 @@ pytest --cov=app --cov-report=term-missing
 ```
 
 **출력 예시**:
-```
+
+```text
 ---------- coverage: platform darwin, python 3.11.0 -----------
 Name                     Stmts   Miss  Cover   Missing
 ------------------------------------------------------
@@ -1132,7 +1237,8 @@ open htmlcov/index.html  # macOS
 ```
 
 **생성되는 파일**:
-```
+
+```text
 htmlcov/
 ├── index.html           # 메인 페이지
 ├── app_main_py.html     # app/main.py 상세 커버리지
@@ -1143,6 +1249,7 @@ htmlcov/
 ### 3.8.3 커버리지 설정 파일
 
 **`.coveragerc` 파일**:
+
 ```ini
 # .coveragerc
 [run]
@@ -1166,6 +1273,7 @@ directory = htmlcov
 ```
 
 **사용**:
+
 ```bash
 # .coveragerc 파일 사용
 pytest --cov
@@ -1181,6 +1289,7 @@ pytest --cov=app --cov-fail-under=90
 ```
 
 **CI/CD에서 활용**:
+
 ```yaml
 # .github/workflows/test.yml
 name: Test
@@ -1211,7 +1320,7 @@ jobs:
 
 ### 3.9.1 완전한 프로젝트 구조
 
-```
+```text
 kaira-server/
 ├── app/
 │   ├── __init__.py
@@ -1348,13 +1457,13 @@ client = TestClient(app)
 @pytest.mark.unit
 class TestUnit:
     """단위 테스트 모음"""
-    
+  
     def test_root_endpoint(self):
         """루트 엔드포인트 테스트"""
         response = client.get("/")
         assert response.status_code == 200
         assert "message" in response.json()
-    
+  
     def test_health_check(self):
         """헬스 체크 테스트"""
         response = client.get("/health")
@@ -1366,7 +1475,7 @@ class TestUnit:
 @pytest.mark.integration
 class TestIntegration:
     """통합 테스트 모음"""
-    
+  
     def test_create_and_get_item(self):
         """아이템 생성 후 조회"""
         # 생성
@@ -1376,7 +1485,7 @@ class TestIntegration:
         )
         assert create_response.status_code == 200
         item_id = create_response.json()["id"]
-        
+      
         # 조회
         get_response = client.get(f"/items/{item_id}")
         assert get_response.status_code == 200
@@ -1422,6 +1531,7 @@ def test_slow_operation():
 ```
 
 **선택적 테스트 실행**:
+
 ```bash
 # 단위 테스트만 실행
 pytest -m unit
@@ -1445,11 +1555,13 @@ pytest tests/test_complete.py::TestUnit
 #### 문제 1: ModuleNotFoundError
 
 **증상**:
-```
+
+```text
 ModuleNotFoundError: No module named 'app'
 ```
 
 **해결**:
+
 ```bash
 # pytest.ini에 pythonpath 설정
 [pytest]
@@ -1462,11 +1574,13 @@ export PYTHONPATH="${PYTHONPATH}:${PWD}"
 #### 문제 2: Fixture 순환 참조
 
 **증상**:
-```
+
+```text
 fixture 'test_client' not found
 ```
 
 **해결**:
+
 ```python
 # tests/conftest.py에 fixture 정의
 @pytest.fixture(scope="module")
@@ -1478,11 +1592,13 @@ def test_client():
 #### 문제 3: 비동기 함수 테스트
 
 **증상**:
-```
+
+```text
 RuntimeWarning: coroutine was never awaited
 ```
 
 **해결**:
+
 ```bash
 # pytest-asyncio 설치
 pip install pytest-asyncio
@@ -1524,6 +1640,7 @@ pytest --pdb
 ### 3.10.3 성능 문제
 
 **느린 테스트 찾기**:
+
 ```bash
 # 가장 느린 테스트 10개 표시
 pytest --durations=10
@@ -1533,6 +1650,7 @@ pytest --durations=0
 ```
 
 **병렬 실행** (pytest-xdist):
+
 ```bash
 # 설치
 pip install pytest-xdist
@@ -1614,21 +1732,23 @@ pytest -n auto
 3단계를 완료했다면, 이제 다음을 진행할 수 있습니다:
 
 1. **4단계: Docker 컨테이너화** (`04_DOCKER_GUIDE.md`)
+
    - Dockerfile 작성
    - docker-compose 활용
    - 컨테이너 최적화
-
 2. **2단계 복습**: Poetry 환경에서 테스트 실행
+
    ```bash
    poetry add --group dev pytest pytest-cov pytest-asyncio
    poetry run pytest
    ```
 
 3. **코드 품질 도구 추가**:
+
    ```bash
    # Linter와 Formatter 설치
    pip install black flake8 mypy
-   
+
    # 실행
    black app/ tests/
    flake8 app/ tests/
@@ -1649,6 +1769,7 @@ pytest -n auto
 6. **Coverage**: 테스트 품질 측정
 
 **핵심 명령어**:
+
 ```bash
 # 테스트 실행
 pytest
@@ -1667,5 +1788,5 @@ pytest -n auto
 
 ---
 
-**작성일**: 2025-01-XX  
+**작성일**: 2025-01-XX
 **최종 검증**: FastAPI 0.115.x, pytest 7.4+, pydantic-settings 2.x

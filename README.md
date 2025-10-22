@@ -71,6 +71,7 @@
 **파일**: [`01_FASTAPI_CLI_GUIDE.md`](./01_FASTAPI_CLI_GUIDE.md)
 
 **목표**:
+
 - FastAPI 기초 개념 이해
 - 로컬 개발 서버 구동
 - 정적 파일 서빙
@@ -80,6 +81,7 @@
 **난이도**: ⭐ (쉬움)
 
 **이 단계에서 배울 것**:
+
 - FastAPI와 Uvicorn 설치
 - 수동으로 프로젝트 폴더 생성
 - 라우팅 (`@app.get()`, `@app.post()` 등)
@@ -88,6 +90,7 @@
 - Swagger UI/ReDoc 활용
 
 **완료 시나리오**:
+
 ```bash
 uvicorn main:app --reload
 # http://127.0.0.1:8000 에서 API 실행
@@ -101,6 +104,7 @@ uvicorn main:app --reload
 **파일**: [`02_POETRY_GUIDE.md`](./02_POETRY_GUIDE.md)
 
 **목표**:
+
 - 같은 프로젝트를 Poetry로 재구성
 - 의존성 관리 방법 학습
 - 프로덕션급 폴더 구조 설계
@@ -109,6 +113,7 @@ uvicorn main:app --reload
 **난이도**: ⭐⭐ (중간)
 
 **이 단계에서 배울 것**:
+
 - Poetry 설치 및 프로젝트 초기화
 - `poetry add` 로 의존성 추가
 - `pyproject.toml` 파일 이해
@@ -117,6 +122,7 @@ uvicorn main:app --reload
 - 패키지 구조 설계 (app/, tests/, config/)
 
 **완료 시나리오**:
+
 ```bash
 poetry shell
 poetry run uvicorn kaira_fastapi_poetry.main:app --reload
@@ -131,6 +137,7 @@ poetry run uvicorn kaira_fastapi_poetry.main:app --reload
 **파일**: [`03_TESTING_LOGGING_GUIDE.md`](./03_TESTING_LOGGING_GUIDE.md)
 
 **목표**:
+
 - pytest로 체계적인 테스트 작성
 - FastAPI TestClient 활용
 - 에러 처리 및 로깅 시스템 구축
@@ -140,6 +147,7 @@ poetry run uvicorn kaira_fastapi_poetry.main:app --reload
 **난이도**: ⭐⭐ (중간)
 
 **이 단계에서 배울 것**:
+
 - pytest 기본 사용법 (fixture, parametrize)
 - TestClient로 API 엔드포인트 테스트
 - HTTPException과 커스텀 예외 핸들러
@@ -148,6 +156,7 @@ poetry run uvicorn kaira_fastapi_poetry.main:app --reload
 - pytest-cov로 테스트 커버리지 측정
 
 **완료 시나리오**:
+
 ```bash
 # 테스트 실행
 pytest --cov=app --cov-report=html
@@ -165,6 +174,7 @@ ENVIRONMENT=production uvicorn app.main:app
 **파일**: [`04_DATABASE_GUIDE.md`](./04_DATABASE_GUIDE.md)
 
 **목표**:
+
 - SQLAlchemy ORM 학습
 - PostgreSQL 연결 및 설정
 - CRUD 작업 구현
@@ -174,6 +184,7 @@ ENVIRONMENT=production uvicorn app.main:app
 **난이도**: ⭐⭐ (중간)
 
 **이 단계에서 배울 것**:
+
 - 데이터베이스 선택 기준 (3가지 인기 방식 비교)
 - PostgreSQL 설치 및 초기 설정
 - SQLAlchemy ORM 기초
@@ -185,6 +196,7 @@ ENVIRONMENT=production uvicorn app.main:app
 - 테스트 코드 작성
 
 **인기 있는 데이터베이스 연결 방법 3가지**:
+
 1. **SQLAlchemy + PostgreSQL** (가장 권장) ⭐⭐⭐⭐⭐
    - 관계형 데이터베이스, 강력한 ORM, 마이그레이션 지원
    - 프로덕션 프로젝트에 최적
@@ -194,6 +206,7 @@ ENVIRONMENT=production uvicorn app.main:app
    - 설정 간단, 소규모 프로젝트 최적
 
 **완료 시나리오**:
+
 ```bash
 # PostgreSQL 시작
 brew services start postgresql
@@ -222,6 +235,7 @@ curl -X POST "http://localhost:8000/api/posts/?author_id=1" \
 **파일**: [`05_DOCKER_GUIDE.md`](./05_DOCKER_GUIDE.md)
 
 **목표**:
+
 - Dockerfile 작성
 - Docker 이미지 빌드
 - 컨테이너 실행
@@ -231,6 +245,7 @@ curl -X POST "http://localhost:8000/api/posts/?author_id=1" \
 **난이도**: ⭐⭐⭐ (중상)
 
 **이 단계에서 배울 것**:
+
 - Docker 개념 (이미지, 컨테이너, 레지스트리)
 - Dockerfile 작성 (Poetry 프로젝트용)
 - Multi-stage 빌드로 이미지 최적화
@@ -239,6 +254,7 @@ curl -X POST "http://localhost:8000/api/posts/?author_id=1" \
 - Nginx 리버스 프록시 설정
 
 **완료 시나리오**:
+
 ```bash
 # 개발 환경
 docker-compose up -d
@@ -258,6 +274,7 @@ docker run -p 80:80 kaira-server
 **파일**: [`05_CLOUD_DEPLOYMENT_GUIDE.md`](./05_CLOUD_DEPLOYMENT_GUIDE.md)
 
 **목표**:
+
 - 클라우드 인스턴스에 배포
 - 도메인 연결
 - SSL 인증서 설치
@@ -267,6 +284,7 @@ docker run -p 80:80 kaira-server
 **난이도**: ⭐⭐⭐⭐ (상)
 
 **이 단계에서 배울 것**:
+
 - AWS EC2 인스턴스 생성 및 설정
 - Docker를 EC2에 설치 및 배포
 - 도메인 구매 및 DNS 설정
@@ -277,6 +295,7 @@ docker run -p 80:80 kaira-server
 - 무중단 배포 전략 (Blue-Green)
 
 **완료 시나리오**:
+
 ```bash
 # SSH 접속
 ssh -i key.pem ubuntu@<EC2_IP>
@@ -289,6 +308,7 @@ https://yourdomain.com
 ```
 
 **선택지**:
+
 - **AWS EC2** (가장 유연, 초보자 친화적) ← 메인으로 다룸
 - **GCP App Engine** (서버리스, 관리 최소화)
 - **Azure App Service** (엔터프라이즈, 기능 많음)
@@ -341,15 +361,18 @@ docs/
 ## 💡 학습 팁
 
 ### 1. 단계별로 진행하기
+
 - 각 단계를 완료 후 다음 단계로 진행
 - 이전 단계로 돌아가 복습하기 (특히 2단계에서)
 
 ### 2. 실습하기
+
 - 문서만 읽지 말고 직접 손으로 코드 입력
 - 명령어 복사-붙여넣기 피하기
 - 에러 메시지를 자세히 읽기
 
 ### 3. 문서 활용
+
 - 공식 문서 우선 (ChatGPT보다 정확함)
   - FastAPI: https://fastapi.tiangolo.com
   - Poetry: https://python-poetry.org
@@ -357,6 +380,7 @@ docs/
   - AWS: https://docs.aws.amazon.com
 
 ### 4. 기록 남기기
+
 - 각 단계별 배운 점 정리
 - 어려웠던 부분 메모
 - 나만의 체크리스트 작성
@@ -367,12 +391,12 @@ docs/
 
 **총 기간**: 2-4주 (개인 공부 기준)
 
-| 주차 | 단계 | 일정 |
-|------|------|------|
-| 1주 | 1단계 | Mon-Wed: 학습 / Thu-Fri: 심화 |
-| 2주 | 2단계 | Mon-Wed: 학습 / Thu-Fri: 통합 테스트 |
-| 3주 | 3-4단계 | Mon-Wed: 테스트 / Thu-Fri: Docker |
-| 4주 | 5단계 | Mon-Thu: 배포 / Fri: 최종 점검 |
+| 주차 | 단계    | 일정                                 |
+| ---- | ------- | ------------------------------------ |
+| 1주  | 1단계   | Mon-Wed: 학습 / Thu-Fri: 심화        |
+| 2주  | 2단계   | Mon-Wed: 학습 / Thu-Fri: 통합 테스트 |
+| 3주  | 3-4단계 | Mon-Wed: 테스트 / Thu-Fri: Docker    |
+| 4주  | 5단계   | Mon-Thu: 배포 / Fri: 최종 점검       |
 
 **유연성**: 원하는 속도로 진행 가능 (빠르거나 느릴 수 있음)
 
@@ -383,6 +407,7 @@ docs/
 모든 단계를 완료하면 다음을 할 수 있게 됩니다:
 
 **기술 스킬**:
+
 - ✅ FastAPI로 REST API 설계 및 구현
 - ✅ 테스트 코드 작성
 - ✅ Docker로 앱 배포
@@ -390,12 +415,14 @@ docs/
 - ✅ CI/CD 파이프라인 이해
 
 **실전 경험**:
+
 - ✅ 로컬 개발 환경 구축
 - ✅ 프로덕션급 코드 작성
 - ✅ 실제 인스턴스에 배포
 - ✅ 모니터링 및 로깅 운영
 
 **다음 스텝**:
+
 - Django로 풀스택 웹 개발
 - 데이터베이스 (PostgreSQL, MongoDB)
 - 마이크로서비스 아키텍처
@@ -409,13 +436,13 @@ docs/
 
 **1단계 (CLI) → 2단계 (Poetry) 순서의 장점:**
 
-| 특징 | 설명 |
-|------|------|
-| **단계적 진행** | 쉬운 것부터 어려운 것으로 |
-| **복습 효과** | 같은 코드를 다른 방식으로 재구성 |
-| **비교 학습** | CLI vs Poetry 차이 자연스럽게 이해 |
-| **포기 방지** | 초반에 성공 경험으로 동기부여 |
-| **실무 적용** | 각 단계가 실제 프로젝트에 직접 사용 가능 |
+| 특징                  | 설명                                     |
+| --------------------- | ---------------------------------------- |
+| **단계적 진행** | 쉬운 것부터 어려운 것으로                |
+| **복습 효과**   | 같은 코드를 다른 방식으로 재구성         |
+| **비교 학습**   | CLI vs Poetry 차이 자연스럽게 이해       |
+| **포기 방지**   | 초반에 성공 경험으로 동기부여            |
+| **실무 적용**   | 각 단계가 실제 프로젝트에 직접 사용 가능 |
 
 ### 📝 문서의 특징
 
@@ -431,17 +458,20 @@ docs/
 ### 문제 해결
 
 **문제**: 명령어가 실행되지 않음
+
 - 터미널에서 에러 메시지 전체 읽기
 - 경로 확인 (`pwd`, `ls`)
 - 가상환경 활성화 확인 (`which python`)
 
 **문제**: 포트가 이미 사용 중
+
 ```bash
 # 포트 변경
 uvicorn main:app --port 8001 --reload
 ```
 
 **문제**: 모듈을 찾을 수 없음
+
 ```bash
 # 의존성 재설치
 pip install -r requirements.txt
@@ -479,4 +509,3 @@ A: [클라우드 배포 가이드](./05_CLOUD_DEPLOYMENT_GUIDE.md)의 "모니터
 ---
 
 **마지막 업데이트**: 2025년 10월 21일
-**현재 완성도**: 1단계 ✅ | 2-5단계 ⏳

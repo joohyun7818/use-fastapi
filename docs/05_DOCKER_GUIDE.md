@@ -53,7 +53,7 @@ Docker는 애플리케이션을 **컨테이너**라는 표준화된 단위로 �
 
 # 설치 확인
 docker --version
-docker-compose --version
+docker compose version
 ```
 
 **Ubuntu/Linux**:
@@ -78,7 +78,7 @@ newgrp docker
 
 # PowerShell에서 확인
 docker --version
-docker-compose --version
+docker compose version
 ```
 
 ### 5.2.4 Docker 기본 명령어
@@ -143,7 +143,7 @@ uvicorn[standard]>=0.30.0
 FROM python:3.11
 
 # Poetry 설치
-RUN pip install --no-cache-dir poetry==1.8.5
+RUN pip install --no-cache-dir poetry==2.2.1
 
 WORKDIR /code
 
