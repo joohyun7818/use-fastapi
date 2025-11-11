@@ -754,151 +754,260 @@ def test_validation_error():
 
 ## 3.6 로깅 시스템
 
-### 3.6.1 Python logging 기본
+### 3.6.1 현재 프로젝트의 로깅 설정
 
-**로깅 설정** (`app/logging_config.py`):
+프로젝트의 로깅은 `src/kaira_fastapi_poetry/logging_config.py`에서 중앙 집중식으로 관리됩니다.
+
+**로깅 설정 파일**:
 
 ```python
-# app/logging_config.py
+# src/kaira_fastapi_poetry/logging_config.py
 import logging
-import sys
+import logging.handlers
+import os
 from pathlib import Path
 
 def setup_logging():
-    """로깅 설정"""
+    """FastAPI 애플리케이션 로깅 설정"""
+    
     # 로그 디렉토리 생성
-    log_dir = Path("logs")
+    log_dir = Path(__file__).parent.parent.parent / "logs"
     log_dir.mkdir(exist_ok=True)
-  
-    # 로그 포맷 설정
-    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    date_format = "%Y-%m-%d %H:%M:%S"
-  
+    
+    # 로그 파일 경로
+    log_file = log_dir / "app.log"
+    
+    # 로그 포맷
+    formatter = logging.Formatter(
+        fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
     # 루트 로거 설정
-    logging.basicConfig(
-        level=logging.INFO,
-        format=log_format,
-        datefmt=date_format,
-        handlers=[
-            # 콘솔 출력
-            logging.StreamHandler(sys.stdout),
-            # 파일 출력
-            logging.FileHandler(log_dir / "app.log", encoding="utf-8")
-        ]
-    )
-  
-    # 특정 로거 레벨 조정
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-
-# 로거 생성 함수
-def get_logger(name: str):
-    """로거 인스턴스 생성"""
-    return logging.getLogger(name)
-```
-
-**메인 앱에서 사용** (`app/main.py`):
-
-```python
-# app/main.py
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from app.logging_config import setup_logging, get_logger
-
-# 로깅 설정
-setup_logging()
-logger = get_logger(__name__)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """애플리케이션 생명주기 관리"""
-    # startup
-    logger.info("애플리케이션 시작")
-    yield
-    # shutdown
-    logger.info("애플리케이션 종료")
-
-app = FastAPI(lifespan=lifespan)
-
-@app.get("/")
-async def root():
-    logger.info("루트 경로 접근")
-    return {"message": "Hello World"}
-
-@app.get("/items/{item_id}")
-async def get_item(item_id: int):
-    logger.info(f"아이템 조회 요청: {item_id}")
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    
+    # 콘솔 핸들러
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+    
+    # 파일 핸들러 (권한 오류 예외 처리)
     try:
-        # 아이템 조회 로직
-        result = {"item_id": item_id, "name": f"Item {item_id}"}
-        logger.debug(f"아이템 조회 성공: {result}")
-        return result
-    except Exception as e:
-        logger.error(f"아이템 조회 실패: {e}", exc_info=True)
-        raise
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_file, 
+            maxBytes=10*1024*1024,  # 10MB
+            backupCount=5,
+            encoding='utf-8'
+        )
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+    except PermissionError:
+        print(f"⚠️  로그 파일 쓰기 권한 없음: {log_file}")
+        print("✅ 콘솔 출력만 사용합니다.")
+    
+    # 라이브러리 로거 레벨 조정
+    logging.getLogger("uvicorn").setLevel(logging.INFO)
+    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 ```
 
-### 3.6.2 로그 레벨
+### 3.6.2 로그 사용 예제
+
+**메인 애플리케이션에서 로깅**:
 
 ```python
-# app/examples/logging_levels.py
-from app.logging_config import get_logger
-
-logger = get_logger(__name__)
-
-def demonstrate_log_levels():
-    """로그 레벨 예제"""
-  
-    # DEBUG: 상세한 디버깅 정보
-    logger.debug("디버그 메시지 - 개발 중에만 필요")
-  
-    # INFO: 일반 정보
-    logger.info("정보 메시지 - 정상 동작 기록")
-  
-    # WARNING: 경고 (문제는 아니지만 주의 필요)
-    logger.warning("경고 메시지 - 잠재적 문제 발견")
-  
-    # ERROR: 에러 (기능 실패)
-    logger.error("에러 메시지 - 기능 실행 실패")
-  
-    # CRITICAL: 치명적 에러 (앱 중단 위험)
-    logger.critical("치명적 에러 - 앱이 계속 실행 불가능")
-```
-
-**환경별 로그 레벨 설정**:
-
-```python
-# app/logging_config.py 수정
-import os
-
-def setup_logging():
-    # 환경 변수로 로그 레벨 결정
-    env = os.getenv("ENVIRONMENT", "development")
-  
-    if env == "production":
-        log_level = logging.WARNING  # 운영: WARNING 이상만
-    elif env == "staging":
-        log_level = logging.INFO     # 스테이징: INFO 이상
-    else:
-        log_level = logging.DEBUG    # 개발: 모든 로그
-  
-    logging.basicConfig(
-        level=log_level,
-        # ... 나머지 설정
-    )
-```
-
-### 3.6.3 미들웨어로 요청/응답 로깅
-
-```python
-# app/middleware/logging.py
-import time
+# src/kaira_fastapi_poetry/main.py
 import logging
-from fastapi import Request
+from fastapi import FastAPI
+from .logging_config import setup_logging
+from .api import users, posts
+from .database import engine, Base
+
+# 로깅 초기화
+setup_logging()
+logger = logging.getLogger(__name__)
+
+# 데이터베이스 테이블 생성
+logger.info("데이터베이스 테이블 생성 시작...")
+Base.metadata.create_all(bind=engine)
+logger.info("데이터베이스 테이블 생성 완료")
+
+# FastAPI 앱 생성
+app = FastAPI(
+    title="Kaira FastAPI Server",
+    description="Modern FastAPI with SQLAlchemy",
+    version="1.0.0"
+)
+logger.info("FastAPI 애플리케이션 초기화 완료")
+
+# 라우터 등록
+app.include_router(users.router)
+app.include_router(posts.router)
+logger.info("API 라우터 등록 완료")
+
+@app.get("/api/health")
+def health_check():
+    logger.debug("헬스 체크 요청")
+    return {"status": "healthy", "service": "kaira-server"}
+```
+
+**CRUD 함수에서 로깅**:
+
+```python
+# src/kaira_fastapi_poetry/crud.py
+import logging
+from sqlalchemy.orm import Session
+from . import models, schemas
 
 logger = logging.getLogger(__name__)
 
-async def log_requests(request: Request, call_next):
-    """요청/응답 로깅 미들웨어"""
+def create_user(db: Session, user: schemas.UserCreate):
+    """사용자 생성 (로깅 포함)"""
+    logger.info(f"사용자 생성 시작: {user.email}")
+    
+    try:
+        fake_hash_password = user.password + "notreallyhashed"
+        db_user = models.User(
+            username=user.username,
+            email=user.email,
+            hashed_password=fake_hash_password,
+            full_name=user.full_name
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        
+        logger.info(f"사용자 생성 성공: {db_user.id} ({user.email})")
+        return db_user
+    except Exception as e:
+        logger.error(f"사용자 생성 실패: {user.email} - {str(e)}", exc_info=True)
+        db.rollback()
+        raise
+
+def get_user(db: Session, user_id: int):
+    """사용자 조회 (로깅 포함)"""
+    logger.debug(f"사용자 조회: {user_id}")
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    if user:
+        logger.debug(f"사용자 조회 성공: {user.email}")
+    else:
+        logger.warning(f"사용자를 찾을 수 없음: {user_id}")
+    
+    return user
+```
+
+**API 엔드포인트에서 로깅**:
+
+```python
+# src/kaira_fastapi_poetry/api/users.py
+import logging
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from .. import crud, schemas
+from ..database import get_db
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/users", tags=["users"])
+
+@router.post("/", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    """사용자 생성 엔드포인트 (로깅 포함)"""
+    logger.info(f"POST /users - 새 사용자 생성 요청: {user.email}")
+    
+    # 중복 체크
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        logger.warning(f"중복 이메일: {user.email}")
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # 사용자 생성
+    new_user = crud.create_user(db=db, user=user)
+    logger.info(f"사용자 생성 완료: {new_user.id} ({new_user.email})")
+    
+    return new_user
+
+@router.get("/{user_id}", response_model=schemas.UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    """사용자 조회 엔드포인트 (로깅 포함)"""
+    logger.info(f"GET /users/{user_id} - 사용자 조회 요청")
+    
+    db_user = crud.get_user(db, user_id=user_id)
+    if not db_user:
+        logger.warning(f"사용자를 찾을 수 없음: {user_id}")
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    logger.info(f"사용자 조회 완료: {db_user.email}")
+    return db_user
+```
+
+### 3.6.3 로그 레벨 이해
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+# DEBUG: 상세한 개발 정보 (자주 사용)
+logger.debug("디버그: 변수 값 = %s", variable_value)
+
+# INFO: 일반 정보 (정상 동작)
+logger.info("사용자 %d 생성 완료", user_id)
+
+# WARNING: 경고 (문제는 아니지만 주의 필요)
+logger.warning("중복된 이메일: %s", email)
+
+# ERROR: 에러 (기능 실패)
+logger.error("데이터베이스 연결 실패: %s", error_msg)
+
+# CRITICAL: 치명적 에러 (앱 중단 가능성)
+logger.critical("환경변수 DATABASE_URL이 없습니다")
+```
+
+**로그 레벨별 실제 사용 예**:
+
+```python
+# src/kaira_fastapi_poetry/crud.py의 delete_user 함수
+def delete_user(db: Session, user_id: int):
+    """사용자 삭제 (로그 레벨 예시)"""
+    logger.debug(f"delete_user 함수 호출: user_id={user_id}")  # DEBUG
+    
+    db_user = get_user(db, user_id)
+    if not db_user:
+        logger.warning(f"삭제 요청된 사용자 없음: {user_id}")  # WARNING
+        return None
+    
+    try:
+        db.delete(db_user)
+        db.commit()
+        logger.info(f"사용자 삭제 성공: {user_id}")  # INFO
+        return db_user
+    except Exception as e:
+        logger.error(f"사용자 삭제 실패: {str(e)}", exc_info=True)  # ERROR
+        db.rollback()
+        raise
+```
+
+### 3.6.4 로그 파일 위치 및 확인
+
+```bash
+# 로그 파일 확인
+cat /Users/joohyun/joohyun/python/fast-api/kaira-fastapi-poetry/logs/app.log
+
+# 실시간 로그 모니터링
+tail -f /Users/joohyun/joohyun/python/fast-api/kaira-fastapi-poetry/logs/app.log
+
+# 특정 로그 필터링
+grep "ERROR" /Users/joohyun/joohyun/python/fast-api/kaira-fastapi-poetry/logs/app.log
+
+# 라인 수 확인
+wc -l /Users/joohyun/joohyun/python/fast-api/kaira-fastapi-poetry/logs/app.log
+```
+
+**로그 파일 자동 관리**: 설정에서 `RotatingFileHandler` 사용으로:
+- 파일 크기가 10MB를 초과하면 자동으로 새 파일로 회전
+- 최대 5개의 백업 파일 유지 (`app.log`, `app.log.1`, `app.log.2` 등)
     # 요청 시작 시간
     start_time = time.time()
   

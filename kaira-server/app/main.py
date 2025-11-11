@@ -5,7 +5,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pathlib import Path
 from contextlib import asynccontextmanager
+
 from app.logging_config import setup_logging, get_logger
+from app.middleware.logging import log_requests
+from app.config import settings
 
 class ItemNotFoundException(Exception):
     def __init__(self, item_id: str):
@@ -21,31 +24,60 @@ async def lifespan(app: FastAPI):
     # startup
     logger.info("애플리케이션이 시작되었습니다.")
     yield
-    # shutdown (필요시 추가)
+    # shutdown 
+    logger.info("애플리케이션이 종료됩니다.")
 
 
-app = FastAPI(lifespan=lifespan)
-
+app = FastAPI(
+    lifespan=lifespan,
+    title=settings.app_name,
+    debug=settings.debug,
+)
+app.middleware("http")(log_requests)
 
 items_db = {"item1": "book", "item2": "pen", "item3": "notebook"}
 
-
-# 정적 파일 마운트
-static_path = Path(__file__).parent.parent.parent/ "kaira-1.0.0"
-if static_path.exists():
-    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+if settings.static_path.exists():
+    logger.info(f"정적 파일 디렉토리 마운트: {settings.static_path}")
+    app.mount("/static",
+              StaticFiles(directory=str(settings.static_path)), 
+                name="static")
+else:
+    logger.info("정적 파일 디렉토리를 찾을 수 없습니다. '/static' 경로가 마운트되지 않았습니다.")
+    # 정적 파일 마운트
+    static_path = Path(__file__).parent.parent.parent/ "kaira-1.0.0"
+    if static_path.exists():
+        app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
 @app.get("/")
 async def root():
-    return {"message": "Kaira Static Server"}
+    logger.info("루트 엔드포인트에 접근했습니다.")
+    return {
+        "app": settings.app_name,
+        "environment": settings.environment
+    }
+
+@app.get("/config")
+async def get_config():
+    if not settings.debug:
+        return {"error": "Config access is only available in debug mode."}
+    return {
+        "app_name": settings.app_name,
+        "environment": settings.environment,
+        "static_dir": str(settings.static_path),
+        "log_level": settings.log_level,
+    }
 
 @app.get("/items/{item_id}")
 async def get_item(item_id: str):
+    logger.info(f"Item 요청: {item_id}")
     if item_id not in items_db:
+        logger.info(f"Item {item_id} not found.")
         raise HTTPException(
             status_code=404, 
             detail=f"Item {item_id} not found"
         )
+    logger.debug(f"Item {item_id} found: {items_db[item_id]}")
     return {"item_id": item_id, "name": items_db[item_id]}
 
 @app.get("/items-header/{item_id}")
@@ -57,7 +89,6 @@ async def get_item_with_header(item_id: str):
             headers={"X-Error": "Custom error header"}
         )
     return {"item_id": item_id, "name": items_db[item_id]}
-
 
 
 # 커스텀 예외 핸들러

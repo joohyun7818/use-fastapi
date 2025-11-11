@@ -17,7 +17,6 @@ def module_fixture():
     yield "module data"
     print("\n모듈 fixture 종료")
     
-
 @pytest.fixture(scope="session")
 def session_fixture():
     '''모듈당 한번만 실행'''
