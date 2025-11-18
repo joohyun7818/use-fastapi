@@ -1,0 +1,94 @@
+
+
+services:
+  # === FastAPI 서버 ===
+  kaira-api:
+    # 로컬 이미지 사용 (docker build로 미리 생성한 이미지)
+    image: kaira-fastapi:latest
+    container_name: kaira-api
+    restart: unless-stopped
+    ports:
+      - "80:8000"
+    environment:
+      # 데이터베이스 연결 (컨테이너 네트워크 내에서 service name으로 접속)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kaira_user}:${POSTGRES_PASSWORD:-kaira_1234}@postgres:5432/${POSTGRES_DB:-kaira_db}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kaira_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # === PostgreSQL 데이터베이스 ===
+  postgres:
+    image: postgres:16-alpine
+    container_name: kaira_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kaira_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kaira_1234}
+      POSTGRES_DB: ${POSTGRES_DB:-kaira_db}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kaira_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kaira_user} -d ${POSTGRES_DB:-kaira_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # === pgAdmin (GUI 관리 도구 - 선택사항, 개발/운영 모두 가능) ===
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: kaira_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kaira_network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # 프로덕션에서는 제거: profiles: ["prod"] 추가 후 prod 프로파일에서만 실행
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  kaira_network:
+    driver: bridge
+

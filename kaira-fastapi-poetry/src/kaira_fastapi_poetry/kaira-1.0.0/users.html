@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>User Console - Kaira</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/vendor.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-light border-bottom py-3">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/main-logo.png" alt="logo"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="auth.html">Auth</a></li>
+          <li class="nav-item"><a class="nav-link active" href="users.html">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="system.html">System</a></li>
+          <li class="nav-item"><a class="nav-link" href="tester.html">Tester</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-5">
+    <section class="container">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <p class="text-uppercase text-muted mb-2">환경</p>
+              <label class="form-label" for="base-url">Base URL</label>
+              <input id="base-url" class="form-control">
+              <p class="small text-muted mt-2">포털 전역에서 공유되는 기본 URL입니다. 운영 서버는 80번 포트를 사용합니다.</p>
+            </div>
+          </div>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <p class="text-uppercase text-muted mb-2">세션 상태</p>
+              <div id="user-session">
+                <span class="badge bg-secondary">로그인 필요</span>
+                <p class="small text-muted mb-2">먼저 <a href="auth.html">로그인 페이지</a>에서 토큰을 발급받으세요.</p>
+              </div>
+              <div id="user-session-detail" class="d-none">
+                <p class="fw-semibold mb-1" id="user-name"></p>
+                <p class="mb-1" id="user-email"></p>
+                <p class="small text-muted" id="user-role"></p>
+                <button class="btn btn-outline-secondary btn-sm" id="sync-profile-btn">프로필 새로고침</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="alert alert-info" role="alert" id="login-hint">
+            보호된 API입니다. 로그인 후 자동으로 저장된 토큰이 사용됩니다.
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">내 프로필</h5>
+                <span class="badge bg-secondary">GET /api/users/me</span>
+              </div>
+              <form id="me-form" data-result-target="me-result" data-require-auth="true" class="mt-3">
+                <button class="btn btn-dark" type="submit">불러오기</button>
+              </form>
+              <pre id="me-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">사용자 목록</h5>
+                <span class="badge bg-secondary">GET /api/users</span>
+              </div>
+              <form id="list-form" data-result-target="list-result" data-require-auth="true" class="mt-3">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Skip</label>
+                    <input name="skip" type="number" class="form-control" value="0" min="0">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Limit</label>
+                    <input name="limit" type="number" class="form-control" value="10" min="1">
+                  </div>
+                </div>
+                <button class="btn btn-dark mt-3" type="submit">목록 조회</button>
+              </form>
+              <pre id="list-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">사용자 조회</h5>
+                    <span class="badge bg-secondary">GET /api/users/{id}</span>
+                  </div>
+                  <form id="get-form" data-result-target="get-result" data-require-auth="true" class="mt-3">
+                    <label class="form-label">User ID</label>
+                    <input name="user_id" type="number" class="form-control" min="1" required>
+                    <button class="btn btn-dark w-100 mt-3" type="submit">조회</button>
+                  </form>
+                  <pre id="get-result" class="bg-light p-3 rounded mt-3"></pre>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">사용자 삭제</h5>
+                    <span class="badge bg-secondary">DELETE /api/users/{id}</span>
+                  </div>
+                  <form id="delete-form" data-result-target="delete-result" data-require-auth="true" class="mt-3">
+                    <label class="form-label">User ID</label>
+                    <input name="user_id" type="number" class="form-control" min="1" required>
+                    <button class="btn btn-danger w-100 mt-3" type="submit">삭제</button>
+                  </form>
+                  <pre id="delete-result" class="bg-light p-3 rounded mt-3"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">사용자 정보 수정</h5>
+                <span class="badge bg-secondary">PUT /api/users/{id}</span>
+              </div>
+              <form id="update-form" data-result-target="update-result" data-require-auth="true" class="mt-3">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label">User ID</label>
+                    <input name="user_id" type="number" class="form-control" min="1" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Full name</label>
+                    <input name="full_name" class="form-control">
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label">Email</label>
+                    <input name="email" type="email" class="form-control">
+                  </div>
+                </div>
+                <button class="btn btn-dark mt-3" type="submit">업데이트</button>
+              </form>
+              <pre id="update-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-top py-4 mt-5">
+    <div class="container text-center text-md-start">
+      <p class="mb-0">&copy; 2024 Kaira API Portal.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+  <script src="js/api-pages.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      apiHelpers.bindBaseInputs('#base-url');
+
+      const sessionContainer = document.getElementById('user-session');
+      const sessionDetail = document.getElementById('user-session-detail');
+      const nameEl = document.getElementById('user-name');
+      const emailEl = document.getElementById('user-email');
+      const roleEl = document.getElementById('user-role');
+      const hint = document.getElementById('login-hint');
+
+      apiHelpers.onAuthChange(({ accessToken, profile }) => {
+        if (accessToken) {
+          hint.classList.replace('alert-info', 'alert-success');
+          hint.textContent = '저장된 토큰이 적용됩니다.';
+          if (profile) {
+            sessionContainer.innerHTML = '<span class="badge bg-success">로그인됨</span>';
+            sessionDetail.classList.remove('d-none');
+            nameEl.textContent = profile.full_name || profile.username;
+            emailEl.textContent = profile.email;
+            roleEl.textContent = `role: ${profile.role}`;
+          } else {
+            sessionContainer.innerHTML = '<span class="badge bg-warning text-dark">토큰 확보</span>';
+            sessionDetail.classList.add('d-none');
+          }
+        } else {
+          hint.classList.replace('alert-success', 'alert-info');
+          hint.textContent = '보호된 API입니다. 먼저 로그인하세요.';
+          sessionContainer.innerHTML = '<span class="badge bg-secondary">로그인 필요</span><p class="small text-muted mb-0">먼저 로그인 페이지에서 인증하세요.</p>';
+          sessionDetail.classList.add('d-none');
+        }
+      });
+
+      document.getElementById('sync-profile-btn').addEventListener('click', async () => {
+        try {
+          const profile = await apiHelpers.fetchProfile();
+          nameEl.textContent = profile.full_name || profile.username;
+          emailEl.textContent = profile.email;
+          roleEl.textContent = `role: ${profile.role}`;
+        } catch (err) {
+          alert('프로필을 불러올 수 없습니다.');
+        }
+      });
+
+      apiHelpers.attachForm('me-form', () => apiHelpers.callApi({ method: 'GET', path: '/api/users/me' }), { requireAuth: true });
+
+      apiHelpers.attachForm('list-form', (form) => {
+        const skip = Number(form.skip.value) || 0;
+        const limit = Number(form.limit.value) || 10;
+        return apiHelpers.callApi({ method: 'GET', path: '/api/users/', query: { skip, limit } });
+      }, { requireAuth: true });
+
+      apiHelpers.attachForm('get-form', (form) => {
+        const userId = Number(form.user_id.value);
+        return apiHelpers.callApi({ method: 'GET', path: `/api/users/${userId}` });
+      }, { requireAuth: true });
+
+      apiHelpers.attachForm('update-form', (form) => {
+        const userId = Number(form.user_id.value);
+        const payload = {};
+        if (form.full_name.value.trim()) payload.full_name = form.full_name.value.trim();
+        if (form.email.value.trim()) payload.email = form.email.value.trim();
+        return apiHelpers.callApi({ method: 'PUT', path: `/api/users/${userId}`, body: payload });
+      }, { requireAuth: true });
+
+      apiHelpers.attachForm('delete-form', (form) => {
+        const userId = Number(form.user_id.value);
+        return apiHelpers.callApi({ method: 'DELETE', path: `/api/users/${userId}` });
+      }, { requireAuth: true });
+    });
+  </script>
+</body>
+
+</html>

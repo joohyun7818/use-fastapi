@@ -18,22 +18,17 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
-def get_user_by_username(db: Session, username: str):
-    """사용자명으로 사용자 조회"""
-    return db.query(models.User).filter(models.User.username == username).first()
-
-
 def get_users(db: Session, skip: int = 0, limit: int = 10):
     """모든 사용자 조회 (페이징)"""
     return db.query(models.User).offset(skip).limit(limit).all()
 
 
-def create_user(db: Session, username: str, email: str, password_hash: str, full_name: str = None):
+def create_user(db: Session, username: str, email: str, hashed_password: str, full_name: str = None):
     """새 사용자 생성"""
     db_user = models.User(
         username=username,
         email=email,
-        password_hash=password_hash,
+        hashed_password=hashed_password,
         full_name=full_name
     )
     db.add(db_user)

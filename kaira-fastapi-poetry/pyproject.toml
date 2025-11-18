@@ -1,46 +1,44 @@
-[project]
+[tool.poetry]
 name = "kaira-fastapi-poetry"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "joohyun7818",email = "dlawngus7818@gmail.com"}
-]
+description = "Test Fast API"
+authors = ["joohyun7818 <dlawngus7818@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "fastapi (>=0.119.1,<0.120.0)",
-    "uvicorn[standard] (>=0.38.0,<0.39.0)",
-    "pydantic-settings (>=2.11.0,<3.0.0)",
-    "httpx (>=0.28.1,<0.29.0)",
-    "pydantic (>=2.12.3,<3.0.0)",
-    "sqlalchemy (>=2.0.44,<3.0.0)",
-    "psycopg2-binary (>=2.9.11,<3.0.0)",
-    "alembic (>=1.17.1,<2.0.0)",
-    "python-dotenv (>=1.2.1,<2.0.0)"
-]
-
-[tool.poetry]
 packages = [{include = "kaira_fastapi_poetry", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = ">=0.119.1,<0.120.0"
+uvicorn = {extras = ["standard"], version = ">=0.38.0,<0.39.0"}
+pydantic-settings = ">=2.11.0,<3.0.0"
+httpx = ">=0.28.1,<0.29.0"
+pydantic = ">=2.12.3,<3.0.0"
+sqlalchemy = ">=2.0.44,<3.0.0"
+psycopg2-binary = ">=2.9.11,<3.0.0"
+alembic = ">=1.17.1,<2.0.0"
+python-dotenv = ">=1.2.1,<2.0.0"
+passlib = "^1.7.4"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+bcrypt = "^4.0.1"
+python-multipart = "^0.0.20"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.4.2,<9.0.0"
+pytest-cov = ">=7.0.0,<8.0.0"
+black = ">=25.9.0,<26.0.0"
+flake8 = ">=7.3.0,<8.0.0"
+mypy = ">=1.18.2,<2.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[dependency-groups]
-dev = [
-    "pytest (>=8.4.2,<9.0.0)",
-    "pytest-cov (>=7.0.0,<8.0.0)",
-    "black (>=25.9.0,<26.0.0)",
-    "flake8 (>=7.3.0,<8.0.0)",
-    "mypy (>=1.18.2,<2.0.0)"
-]
-
 [tool.black]
 line-length = 78
-target-version = ['py310']
+target-version = ['py311']
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 

@@ -4,17 +4,17 @@
 
 ## 📚 5단계 목차
 
-| 챕터 | 주제 | 예상 시간 |
-|------|------|---------|
-| [5.1](#51-docker-개념-이해) | Docker 개념 이해 | 30분 |
-| [5.2](#52-dockerfile-작성) | Dockerfile 작성 | 1시간 |
-| [5.3](#53-이미지-빌드와-실행) | 이미지 빌드와 실행 | 45분 |
-| [5.4](#54-docker-compose-활용) | docker-compose 활용 | 1시간 |
-| [5.5](#55-최적화와-best-practices) | 최적화와 Best Practices | 1시간 |
-| [5.6](#56-로컬-개발-환경-구성) | 로컬 개발 환경 구성 | 1시간 |
-| [5.7](#57-프로덕션-배포-준비) | 프로덕션 배포 준비 | 1시간 |
-| [5.8](#58-문제-해결) | 문제 해결 | 30분 |
-| [5.9](#59-체크리스트) | 체크리스트 | - |
+| 챕터                            | 주제                    | 예상 시간 |
+| ------------------------------- | ----------------------- | --------- |
+| [5.1](#51-docker-개념-이해)        | Docker 개념 이해        | 30분      |
+| [5.2](#52-dockerfile-작성)         | Dockerfile 작성         | 1시간     |
+| [5.3](#53-이미지-빌드와-실행)      | 이미지 빌드와 실행      | 45분      |
+| [5.4](#54-docker-compose-활용)     | docker-compose 활용     | 1시간     |
+| [5.5](#55-최적화와-best-practices) | 최적화와 Best Practices | 1시간     |
+| [5.6](#56-로컬-개발-환경-구성)     | 로컬 개발 환경 구성     | 1시간     |
+| [5.7](#57-프로덕션-배포-준비)      | 프로덕션 배포 준비      | 1시간     |
+| [5.8](#58-문제-해결)               | 문제 해결               | 30분      |
+| [5.9](#59-체크리스트)              | 체크리스트              | -         |
 
 ---
 
@@ -25,6 +25,7 @@
 Docker는 애플리케이션을 **컨테이너**라는 표준화된 단위로 패키징하고 실행하는 플랫폼입니다.
 
 **핵심 개념**:
+
 - **이미지(Image)**: 애플리케이션 실행에 필요한 모든 것(코드, 라이브러리, 설정)이 담긴 템플릿
 - **컨테이너(Container)**: 이미지를 실행한 인스턴스
 - **Dockerfile**: 이미지를 만드는 레시피
@@ -33,12 +34,14 @@ Docker는 애플리케이션을 **컨테이너**라는 표준화된 단위로 �
 ### 5.2.2 왜 Docker를 사용하는가?
 
 **문제점 (Docker 없이)**:
+
 ```
 개발자: "내 컴퓨터에서는 잘 되는데요..."
 운영자: "서버에서는 안 돌아가요..."
 ```
 
 **해결책 (Docker 사용)**:
+
 - ✅ **일관성**: 어디서든 같은 환경
 - ✅ **격리성**: 각 앱이 독립적으로 실행
 - ✅ **이식성**: 어떤 서버에도 쉽게 배포
@@ -47,6 +50,7 @@ Docker는 애플리케이션을 **컨테이너**라는 표준화된 단위로 �
 ### 5.2.3 Docker 설치
 
 **macOS**:
+
 ```bash
 # Docker Desktop 다운로드 및 설치
 # https://docs.docker.com/desktop/install/mac-install/
@@ -57,6 +61,7 @@ docker compose version
 ```
 
 **Ubuntu/Linux**:
+
 ```bash
 # Docker Engine 설치
 sudo apt-get update
@@ -72,6 +77,7 @@ newgrp docker
 ```
 
 **Windows**:
+
 ```powershell
 # Docker Desktop 다운로드 및 설치
 # https://docs.docker.com/desktop/install/windows-install/
@@ -129,6 +135,7 @@ CMD ["fastapi", "run", "app/main.py", "--port", "80"]
 ```
 
 **requirements.txt**:
+
 ```txt
 fastapi[standard]>=0.115.0
 uvicorn[standard]>=0.30.0
@@ -171,15 +178,15 @@ CMD ["uvicorn", "kaira_fastapi_poetry.main:app", "--host", "0.0.0.0", "--port", 
 
 ### 5.3.3 Dockerfile 명령어 설명
 
-| 명령어 | 설명 | 예시 |
-|--------|------|------|
-| `FROM` | 베이스 이미지 지정 | `FROM python:3.11` |
-| `WORKDIR` | 작업 디렉토리 설정 | `WORKDIR /code` |
-| `COPY` | 파일/디렉토리 복사 | `COPY ./app /code/app` |
-| `RUN` | 명령어 실행 (빌드 시) | `RUN pip install -r requirements.txt` |
-| `ENV` | 환경 변수 설정 | `ENV PYTHONUNBUFFERED=1` |
-| `EXPOSE` | 포트 문서화 | `EXPOSE 80` |
-| `CMD` | 컨테이너 실행 명령 (런타임) | `CMD ["uvicorn", "main:app"]` |
+| 명령어      | 설명                        | 예시                                    |
+| ----------- | --------------------------- | --------------------------------------- |
+| `FROM`    | 베이스 이미지 지정          | `FROM python:3.11`                    |
+| `WORKDIR` | 작업 디렉토리 설정          | `WORKDIR /code`                       |
+| `COPY`    | 파일/디렉토리 복사          | `COPY ./app /code/app`                |
+| `RUN`     | 명령어 실행 (빌드 시)       | `RUN pip install -r requirements.txt` |
+| `ENV`     | 환경 변수 설정              | `ENV PYTHONUNBUFFERED=1`              |
+| `EXPOSE`  | 포트 문서화                 | `EXPOSE 80`                           |
+| `CMD`     | 컨테이너 실행 명령 (런타임) | `CMD ["uvicorn", "main:app"]`         |
 
 ### 5.3.4 멀티 스테이지 빌드 (최적화 - 2024 Best Practices)
 
@@ -192,7 +199,7 @@ CMD ["uvicorn", "kaira_fastapi_poetry.main:app", "--host", "0.0.0.0", "--port", 
 FROM python:3.11-slim AS builder
 
 # Poetry 설치
-RUN pip install --no-cache-dir poetry
+RUN pip install --no-cache-dir poetry==1.8.5
 
 WORKDIR /app
 
@@ -210,7 +217,8 @@ FROM python:3.11-slim
 
 # 환경 변수 설정
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    ENVIRONMENT=production
 
 WORKDIR /app
 
@@ -220,31 +228,37 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 
 # 앱 코드 복사
 COPY ./src ./src
-COPY ./kaira-1.0.0 ./kaira-1.0.0
+COPY ./src/kaira_fastapi_poetry/kaira-1.0.0 ./kaira-1.0.0
 
 # 비root 사용자로 실행 (보안 Best Practice)
-RUN useradd -m -u 1000 appuser && chown -R appuser /app
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 # 포트 노출
 EXPOSE 8000
 
-# 앱 실행 (fastapi run 권장)
-CMD ["fastapi", "run", "src/kaira_fastapi_poetry/main.py", "--host", "0.0.0.0", "--port", "8000"]
+# 헬스 체크
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+# 앱 실행
+CMD ["uvicorn", "kaira_fastapi_poetry.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+
 ```
 
 **주요 개선 사항 (2024 Best Practices)**:
 
-| 개선 사항 | 효과 |
-|---------|------|
-| `--no-interaction`, `--no-ansi` | Poetry 일관성 보장 |
-| `--only main` (그룹 지정) | 빌드 도구 제외, 이미지 크기 감소 |
-| `PYTHONDONTWRITEBYTECODE=1` | `.pyc` 파일 방지 |
-| `PYTHONUNBUFFERED=1` | 실시간 로그 출력 |
-| `useradd -u 1000` | UID 명시 (프로덕션 호환성) |
-| `python:3.11-slim` | `full` 대신 `slim` 사용 (이미지 크기 70% 감소) |
+| 개선 사항                           | 효과                                               |
+| ----------------------------------- | -------------------------------------------------- |
+| `--no-interaction`, `--no-ansi` | Poetry 일관성 보장                                 |
+| `--only main` (그룹 지정)         | 빌드 도구 제외, 이미지 크기 감소                   |
+| `PYTHONDONTWRITEBYTECODE=1`       | `.pyc` 파일 방지                                 |
+| `PYTHONUNBUFFERED=1`              | 실시간 로그 출력                                   |
+| `useradd -u 1000`                 | UID 명시 (프로덕션 호환성)                         |
+| `python:3.11-slim`                | `full` 대신 `slim` 사용 (이미지 크기 70% 감소) |
 
 **이미지 크기 비교**:
+
 ```
 python:3.11 (full):     1.0 GB
 python:3.11-slim:       150 MB  (↓ 85%)
@@ -258,6 +272,7 @@ python:3.11-slim:       150 MB  (↓ 85%)
 ### 5.4.1 이미지 빌드
 
 **기본 빌드**:
+
 ```bash
 # 현재 디렉토리에서 빌드 (태그: kaira-server)
 docker build -t kaira-server .
@@ -270,6 +285,7 @@ docker images | grep kaira-server
 ```
 
 **출력 예시**:
+
 ```
 [+] Building 45.3s (12/12) FINISHED
 => [1/6] FROM docker.io/library/python:3.11
@@ -283,6 +299,7 @@ docker images | grep kaira-server
 ### 5.4.2 컨테이너 실행
 
 **기본 실행**:
+
 ```bash
 # 기본 실행 (터미널 블로킹)
 docker run -p 8000:80 kaira-server
@@ -295,6 +312,7 @@ docker ps
 ```
 
 **포트 매핑**:
+
 - `-p HOST_PORT:CONTAINER_PORT`
 - 예: `-p 8000:80` → 호스트의 8000번 포트를 컨테이너의 80번 포트로 연결
 
@@ -316,6 +334,7 @@ docker run -d -p 8000:80 \
 ### 5.4.4 볼륨 마운트
 
 **개발 중 코드 변경 즉시 반영**:
+
 ```bash
 # 로컬 디렉토리를 컨테이너에 마운트
 docker run -d -p 8000:80 \
@@ -360,6 +379,7 @@ docker rmi kaira-server
 여러 컨테이너를 YAML 파일로 정의하고 한 번에 관리하는 도구입니다.
 
 **장점**:
+
 - ✅ 복잡한 docker run 명령을 간단하게
 - ✅ 여러 서비스를 한 번에 시작/중지
 - ✅ 네트워크와 볼륨 자동 생성
@@ -387,6 +407,7 @@ services:
 ```
 
 **실행**:
+
 ```bash
 # 백그라운드 실행
 docker-compose up -d
@@ -404,6 +425,7 @@ docker-compose down -v
 ### 5.5.3 개발/운영 환경 분리
 
 **docker-compose.yml (공통 설정)**:
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -419,6 +441,7 @@ services:
 ```
 
 **docker-compose.dev.yml (개발 환경)**:
+
 ```yaml
 # docker-compose.dev.yml
 version: '3.8'
@@ -435,6 +458,7 @@ services:
 ```
 
 **docker-compose.prod.yml (운영 환경)**:
+
 ```yaml
 # docker-compose.prod.yml
 version: '3.8'
@@ -449,6 +473,7 @@ services:
 ```
 
 **실행 방법**:
+
 ```bash
 # 개발 환경
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
@@ -505,6 +530,7 @@ volumes:
 ```
 
 **실행**:
+
 ```bash
 # 모든 서비스 시작
 docker-compose up -d
@@ -550,6 +576,7 @@ services:
 ```
 
 **앱에 헬스 체크 엔드포인트 추가** (`app/main.py`):
+
 ```python
 from fastapi import FastAPI
 
@@ -568,6 +595,7 @@ async def health_check():
 ### 5.6.1 빌드 캐시 최적화
 
 **나쁜 예** (매번 모든 의존성 재설치):
+
 ```dockerfile
 # ❌ 비효율적
 COPY . /code
@@ -575,6 +603,7 @@ RUN pip install -r requirements.txt
 ```
 
 **좋은 예** (의존성 파일만 먼저 복사):
+
 ```dockerfile
 # ✅ 효율적
 COPY requirements.txt /code/
@@ -585,6 +614,7 @@ COPY . /code
 ### 5.6.2 이미지 크기 최소화
 
 **1. Slim 베이스 이미지 사용**:
+
 ```dockerfile
 # ❌ 1.2GB
 FROM python:3.11
@@ -597,6 +627,7 @@ FROM python:3.11-alpine
 ```
 
 **2. 불필요한 파일 제외 (.dockerignore)**:
+
 ```text
 # .dockerignore
 **/__pycache__
@@ -611,6 +642,7 @@ FROM python:3.11-alpine
 ```
 
 **3. 멀티 스테이지 빌드**:
+
 ```dockerfile
 # ✅ 빌드 도구와 런타임 분리
 FROM python:3.11 as builder
@@ -623,6 +655,7 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 ### 5.6.3 보안 Best Practices
 
 **1. 비root 사용자로 실행**:
+
 ```dockerfile
 # 사용자 생성
 RUN useradd -m -u 1000 appuser
@@ -635,6 +668,7 @@ USER appuser
 ```
 
 **2. 민감 정보 제외**:
+
 ```dockerfile
 # ❌ 절대 하지 말 것
 ENV API_KEY=sk-abc123...
@@ -644,6 +678,7 @@ ENV API_KEY=sk-abc123...
 ```
 
 **3. 버전 고정**:
+
 ```dockerfile
 # ❌ 불안정
 FROM python:3.11
@@ -667,6 +702,7 @@ ENV LOG_LEVEL=INFO
 ```
 
 **앱 코드**:
+
 ```python
 import logging
 import os
@@ -679,12 +715,14 @@ logging.basicConfig(level=log_level)
 ### 5.6.5 성능 최적화
 
 **Uvicorn Workers 설정**:
+
 ```dockerfile
 # CPU 코어 수에 맞춰 worker 개수 설정
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]
 ```
 
 **docker-compose에서 리소스 제한**:
+
 ```yaml
 services:
   app:
@@ -751,6 +789,7 @@ services:
 ```
 
 **실행**:
+
 ```bash
 # 개발 환경 시작
 docker-compose -f docker-compose.dev.yml up
@@ -761,6 +800,7 @@ docker-compose -f docker-compose.dev.yml up
 ### 5.7.3 VS Code Dev Container 설정
 
 **.devcontainer/devcontainer.json**:
+
 ```json
 {
   "name": "Kaira FastAPI Dev",
@@ -905,6 +945,7 @@ http {
 ### 5.8.4 CI/CD 파이프라인 예제
 
 **.github/workflows/docker-deploy.yml**:
+
 ```yaml
 name: Build and Deploy Docker
 
@@ -917,14 +958,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+    
       - name: Build Docker Image
         run: docker build -t kaira-server:${{ github.sha }} -f Dockerfile.prod .
-      
+    
       - name: Run Tests
         run: |
           docker run --rm kaira-server:${{ github.sha }} pytest
-      
+    
       - name: Push to Registry
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -941,11 +982,13 @@ jobs:
 #### 문제 1: "Cannot connect to Docker daemon"
 
 **증상**:
+
 ```
 Cannot connect to the Docker daemon at unix:///var/run/docker.sock
 ```
 
 **해결**:
+
 ```bash
 # Docker 데몬 시작
 sudo systemctl start docker
@@ -957,11 +1000,13 @@ sudo systemctl start docker
 #### 문제 2: 포트 충돌
 
 **증상**:
+
 ```
 Error: Port 8000 is already in use
 ```
 
 **해결**:
+
 ```bash
 # 다른 포트 사용
 docker run -p 8001:80 kaira-server
@@ -973,11 +1018,13 @@ lsof -ti:8000 | xargs kill -9
 #### 문제 3: 빌드 캐시 문제
 
 **증상**:
+
 ```
 의존성을 업데이트했는데 반영이 안 됨
 ```
 
 **해결**:
+
 ```bash
 # 캐시 없이 빌드
 docker build --no-cache -t kaira-server .
@@ -989,11 +1036,13 @@ docker-compose build --no-cache
 #### 문제 4: 볼륨 권한 문제
 
 **증상**:
+
 ```
 Permission denied: '/code/app'
 ```
 
 **해결**:
+
 ```dockerfile
 # Dockerfile에서 권한 설정
 RUN chown -R appuser:appuser /code
@@ -1023,6 +1072,7 @@ docker network inspect bridge
 ### 5.9.3 성능 문제
 
 **빌드가 느릴 때**:
+
 ```bash
 # 빌드킷 사용 (더 빠른 빌드)
 DOCKER_BUILDKIT=1 docker build -t kaira-server .
@@ -1031,6 +1081,7 @@ DOCKER_BUILDKIT=1 docker build -t kaira-server .
 ```
 
 **컨테이너가 느릴 때**:
+
 ```yaml
 # docker-compose.yml에서 리소스 제한 완화
 services:
@@ -1111,24 +1162,25 @@ services:
 4단계를 완료했다면, 이제 다음을 진행할 수 있습니다:
 
 1. **5단계: 클라우드 배포** (`05_CLOUD_DEPLOYMENT_GUIDE.md`)
+
    - AWS EC2에 Docker 컨테이너 배포
    - GCP App Engine 대안
    - 도메인 연결과 SSL 인증서
    - 모니터링과 로깅
-
 2. **로컬 테스트**:
+
    ```bash
    # Docker 이미지 빌드
    docker build -t kaira-server .
-   
+
    # 컨테이너 실행
    docker run -d -p 8000:80 kaira-server
-   
+
    # 접속 테스트
    curl http://localhost:8000
    ```
-
 3. **docker-compose로 전체 스택 실행**:
+
    ```bash
    docker-compose up -d
    docker-compose logs -f
@@ -1147,6 +1199,7 @@ services:
 5. **Best Practices**: 보안, 성능, 로깅
 
 **핵심 명령어**:
+
 ```bash
 # 빌드
 docker build -t kaira-server .
@@ -1164,5 +1217,5 @@ docker-compose down
 
 ---
 
-**작성일**: 2025-01-XX  
+**작성일**: 2025-01-XX
 **최종 검증**: Docker 27.x, docker-compose 2.x, FastAPI 0.115.x

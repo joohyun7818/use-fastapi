@@ -81,3 +81,8 @@ class PostResponse(PostBase):
 class PostWithAuthor(PostResponse):
     """작성자 정보를 포함한 게시물 응답"""
     author: UserResponse
+
+
+class TokenRefreshRequest(BaseModel):
+    """리프레시 요청 바디"""
+    refresh_token: str = Field(..., min_length=1)

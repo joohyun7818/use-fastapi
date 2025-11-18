@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>System Console - Kaira</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/vendor.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-light border-bottom py-3">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/main-logo.png" alt="logo"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="auth.html">Auth</a></li>
+          <li class="nav-item"><a class="nav-link" href="users.html">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link active" href="system.html">System</a></li>
+          <li class="nav-item"><a class="nav-link" href="tester.html">Tester</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-5">
+    <section class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <p class="text-uppercase text-muted mb-2">환경</p>
+              <h5 class="card-title">API 연결 정보</h5>
+              <label class="form-label" for="base-url">Base URL</label>
+              <input id="base-url" class="form-control" autocomplete="off">
+              <p class="small text-muted mt-2">운영 nginx는 80번 포트에 매핑되어 있으므로 기본값은 <code>http://localhost</code>입니다.</p>
+            </div>
+          </div>
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <p class="text-uppercase text-muted mb-2">세션 상태</p>
+              <div id="system-session-state">
+                <span class="badge bg-secondary">익명 모드</span>
+                <p class="small text-muted mb-0">대부분의 진단 API는 인증 없이 호출되며, 토큰이 있으면 /api/config 디버그 정보에 접근할 수 있습니다.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h6 class="text-uppercase text-muted">Diagnostics</h6>
+              <ul class="small list-unstyled mb-0">
+                <li>서비스 상태 점검 (/api/health, /api/info)</li>
+                <li>루트/아이템/검증 샘플</li>
+                <li>커스텀 예외 시나리오</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="badge bg-dark">/api/health</span>
+                <span class="badge bg-dark">/api/info</span>
+                <span class="badge bg-dark">/api/config</span>
+              </div>
+              <div class="mt-3 d-flex flex-wrap gap-2">
+                <button class="btn btn-dark" id="btn-health">Health</button>
+                <button class="btn btn-outline-dark" id="btn-info">Info</button>
+                <button class="btn btn-outline-dark" id="btn-config">Config</button>
+              </div>
+              <pre id="system-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Root summary</h5>
+                <span class="badge bg-secondary">GET /api/</span>
+              </div>
+              <form id="root-form" data-result-target="root-result" class="mt-3">
+                <button class="btn btn-dark" type="submit">Call root</button>
+              </form>
+              <pre id="root-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Items lookup</h5>
+                <span class="badge bg-secondary">GET /api/items/{id}</span>
+              </div>
+              <form id="items-form" data-result-target="items-result" class="mt-3">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-6">
+                    <label class="form-label">Item ID</label>
+                    <input name="item_id" class="form-control" value="item1" required>
+                  </div>
+                  <div class="col-md-6">
+                    <button class="btn btn-dark" type="submit">Fetch item</button>
+                  </div>
+                </div>
+              </form>
+              <pre id="items-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Header error sample</h5>
+                <span class="badge bg-secondary">GET /api/items-header/{id}</span>
+              </div>
+              <form id="header-form" data-result-target="header-result" class="mt-3">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-6">
+                    <label class="form-label">Item ID</label>
+                    <input name="item_id" class="form-control" value="unknown" required>
+                  </div>
+                  <div class="col-md-6">
+                    <button class="btn btn-outline-dark" type="submit">Trigger</button>
+                  </div>
+                </div>
+              </form>
+              <pre id="header-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Validated payload</h5>
+                <span class="badge bg-secondary">POST /api/validated-items/</span>
+              </div>
+              <form id="validated-form" data-result-target="validated-result" class="mt-3">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Name</label>
+                    <input name="name" class="form-control" value="Notebook" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Price</label>
+                    <input name="price" type="number" step="0.01" min="0" class="form-control" value="19.99" required>
+                  </div>
+                </div>
+                <button class="btn btn-dark mt-3" type="submit">Validate</button>
+              </form>
+              <pre id="validated-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Custom exception</h5>
+                <span class="badge bg-secondary">GET /custom-items/{id}</span>
+              </div>
+              <form id="custom-form" data-result-target="custom-result" class="mt-3">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-6">
+                    <label class="form-label">Item ID</label>
+                    <input name="item_id" class="form-control" value="item1" required>
+                  </div>
+                  <div class="col-md-6">
+                    <button class="btn btn-outline-dark" type="submit">Request</button>
+                  </div>
+                </div>
+              </form>
+              <pre id="custom-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-top py-4 mt-5">
+    <div class="container text-center text-md-start">
+      <p class="mb-0">&copy; 2024 Kaira API Portal.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+  <script src="js/api-pages.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      apiHelpers.bindBaseInputs('#base-url');
+
+      const sessionState = document.getElementById('system-session-state');
+      apiHelpers.onAuthChange(({ accessToken }) => {
+        if (accessToken) {
+          sessionState.innerHTML = '<span class="badge bg-success">토큰 적용됨</span><p class="small text-muted mb-0">/api/config 호출 시 저장된 토큰이 자동으로 포함됩니다.</p>';
+        } else {
+          sessionState.innerHTML = '<span class="badge bg-secondary">익명 모드</span><p class="small text-muted mb-0">건강/정보/아이템 API는 모두 공개이며 config는 디버그 토큰이 필요합니다.</p>';
+        }
+      });
+
+      const resultId = 'system-result';
+      const handleButton = (buttonId, path, options = {}) => {
+        const { requireAuth = false } = options;
+        const button = document.getElementById(buttonId);
+        if (!button) return;
+        button.addEventListener('click', async () => {
+          if (requireAuth && !apiHelpers.getAccessToken()) {
+            apiHelpers.renderJson(resultId, { error: '토큰이 없습니다. 먼저 로그인하세요.' });
+            return;
+          }
+          apiHelpers.renderJson(resultId, 'Loading...');
+          try {
+            const data = await apiHelpers.callApi({ method: 'GET', path, withAuth: requireAuth });
+            apiHelpers.renderJson(resultId, data);
+          } catch (err) {
+            apiHelpers.renderJson(resultId, err.payload || { error: err.message });
+          }
+        });
+      };
+
+      handleButton('btn-health', '/api/health');
+      handleButton('btn-info', '/api/info');
+      handleButton('btn-config', '/api/config', { requireAuth: true });
+
+      apiHelpers.attachForm('root-form', () => apiHelpers.callApi({ method: 'GET', path: '/api/' }));
+      apiHelpers.attachForm('items-form', (form) => {
+        const id = form.item_id.value.trim();
+        return apiHelpers.callApi({ method: 'GET', path: `/api/items/${id}` });
+      });
+      apiHelpers.attachForm('header-form', (form) => {
+        const id = form.item_id.value.trim();
+        return apiHelpers.callApi({ method: 'GET', path: `/api/items-header/${id}` });
+      });
+      apiHelpers.attachForm('validated-form', (form) => {
+        const payload = {
+          name: form.name.value.trim(),
+          price: Number(form.price.value),
+        };
+        return apiHelpers.callApi({ method: 'POST', path: '/api/validated-items/', body: payload });
+      });
+      apiHelpers.attachForm('custom-form', (form) => {
+        const id = form.item_id.value.trim();
+        return apiHelpers.callApi({ method: 'GET', path: `/custom-items/${id}` });
+      });
+    });
+  </script>
+</body>
+
+</html>

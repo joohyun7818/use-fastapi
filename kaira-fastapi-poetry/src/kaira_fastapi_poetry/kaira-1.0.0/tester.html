@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>API Tester - Kaira</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/vendor.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body class="homepage">
+  <nav class="navbar navbar-expand-lg bg-light border-bottom py-3">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/main-logo.png" alt="logo"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="auth.html">Auth</a></li>
+          <li class="nav-item"><a class="nav-link" href="users.html">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="system.html">System</a></li>
+          <li class="nav-item"><a class="nav-link active" href="tester.html">Tester</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <section id="api-tester" class="py-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <h1 class="section-title text-center mt-4">OpenAPI Explorer</h1>
+        <div class="col-md-10">
+          <form id="api-form">
+            <div class="row g-2 mb-3">
+              <div class="col-md-4">
+                <label for="base-url" class="form-label">Base URL</label>
+                <input id="base-url" class="form-control" value="http://localhost:8000" />
+              </div>
+              <div class="col-md-4">
+                <label for="endpoint-select" class="form-label">Endpoint</label>
+                <select id="endpoint-select" class="form-select"></select>
+              </div>
+              <div class="col-md-2">
+                <label for="method-select" class="form-label">Method</label>
+                <input id="method-select" class="form-control" readonly />
+              </div>
+              <div class="col-md-2">
+                <label for="auth-token" class="form-label">Bearer Token</label>
+                <input id="auth-token" class="form-control" placeholder="Optional" />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="params-container" class="form-label">Path/Query Params (key=value, one per line)</label>
+              <textarea id="params-container" class="form-control" rows="3" placeholder="id=123\nsearch=abc"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="body" class="form-label">Request Body (JSON)</label>
+              <textarea class="form-control" id="body" rows="6" placeholder='{"key":"value"}'></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="headers" class="form-label">Extra Headers (key=value, one per line)</label>
+              <textarea id="headers" class="form-control" rows="3" placeholder="X-Custom-Header=Value"></textarea>
+            </div>
+            <div class="d-grid gap-2">
+              <button id="send-btn" type="button" class="btn btn-dark text-uppercase w-100">Send Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row justify-content-center mt-5">
+        <div class="col-md-10">
+          <h2>Response</h2>
+          <pre id="report-result" style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px; min-height: 200px;"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="footer" class="mt-5">
+    <div class="border-top py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 text-center text-md-start">
+            <p>&copy; 2024 Kaira API Portal.</p>
+          </div>
+          <div class="col-md-6 text-center text-md-end">
+            <p>Design by <a href="https://templatesjungle.com" target="_blank">TemplatesJungle</a>. Distribution by <a href="https://themewagon.com" target="_blank">ThemeWagon</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/SmoothScroll.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <script src="js/script.min.js"></script>
+  <script>
+    async function fetchOpenAPI(baseUrl) {
+      try {
+        const url = new URL('/openapi.json', baseUrl).toString();
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function buildOptionsFromSpec(spec) {
+      const paths = spec.paths || {};
+      const options = [];
+      for (const path in paths) {
+        for (const method in paths[path]) {
+          options.push({ label: `${method.toUpperCase()} ${path}`, value: `${method.toUpperCase()} ${path}` });
+        }
+      }
+      return options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    function parseKeyValueLines(text) {
+      const obj = {};
+      text.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+        const idx = line.indexOf('=');
+        if (idx > -1) {
+          const key = line.slice(0, idx).trim();
+          const value = line.slice(idx + 1).trim();
+          if (key) obj[key] = value;
+        }
+      });
+      return obj;
+    }
+
+    async function populateEndpoints() {
+      const baseUrl = document.getElementById('base-url').value;
+      const spec = await fetchOpenAPI(baseUrl);
+      const select = $('#endpoint-select');
+      select.empty();
+      if (!spec) {
+        select.append('<option value="">OpenAPI not found on base URL</option>');
+        return;
+      }
+      const options = buildOptionsFromSpec(spec);
+      select.append('<option value="">-- Select endpoint --</option>');
+      options.forEach(opt => select.append(`<option value="${opt.value}">${opt.label}</option>`));
+      window.__openapi_spec = spec;
+    }
+
+    $(document).ready(async function() {
+      await populateEndpoints();
+
+      $('#endpoint-select').on('change', function() {
+        const val = $(this).val();
+        if (!val) { $('#method-select').val(''); return; }
+        const [method, ...pathParts] = val.split(' ');
+        $('#method-select').val(method);
+        $('#params-container').val('');
+        $('#body').val('');
+        const spec = window.__openapi_spec;
+        if (spec) {
+          const [m, ...p] = val.split(' ');
+          const pathSel = p.join(' ');
+          const op = spec.paths[pathSel] && spec.paths[pathSel][m.toLowerCase()];
+          if (op && op.requestBody && op.requestBody.content && op.requestBody.content['application/json']) {
+            const schema = op.requestBody.content['application/json'].schema;
+            const sample = generateSampleFromSchema(schema, spec.components);
+            $('#body').val(JSON.stringify(sample, null, 2));
+          }
+        }
+      });
+
+      $('#base-url').on('change', populateEndpoints);
+
+      $('#send-btn').on('click', async function() {
+        const baseUrl = $('#base-url').val();
+        const endpointVal = $('#endpoint-select').val();
+        const resultElement = $('#report-result')[0];
+        resultElement.textContent = 'Sending...';
+        if (!endpointVal) { resultElement.textContent = 'No endpoint selected'; return; }
+        const [method, ...pathParts] = endpointVal.split(' ');
+        const path = pathParts.join(' ');
+        const params = parseKeyValueLines($('#params-container').val());
+        const headersKv = parseKeyValueLines($('#headers').val());
+        const token = $('#auth-token').val().trim();
+        if (token) headersKv['Authorization'] = `Bearer ${token}`;
+        let finalPath = path;
+        for (const [k, v] of Object.entries(params)) {
+          finalPath = finalPath.replace(`{${k}}`, encodeURIComponent(v));
+        }
+        const url = new URL(finalPath, baseUrl);
+        const pathParamKeys = (path.match(/\{(.*?)\}/g) || []).map(s => s.slice(1,-1));
+        for (const [k, v] of Object.entries(params)) {
+          if (!pathParamKeys.includes(k)) url.searchParams.set(k, v);
+        }
+
+        const bodyText = $('#body').val().trim();
+        const options = { method, headers: {'accept': 'application/json'} };
+        Object.keys(headersKv).forEach(k => options.headers[k] = headersKv[k]);
+        if (bodyText && ['POST','PUT','PATCH'].includes(method)) {
+          options.headers['Content-Type'] = 'application/json';
+          options.body = bodyText;
+        }
+        try {
+          const res = await fetch(url.toString(), options);
+          const text = await res.text();
+          if(!res.ok) { resultElement.textContent = `HTTP ${res.status} ${res.statusText}\n${text}`; return; }
+          try { resultElement.textContent = JSON.stringify(JSON.parse(text), null, 2); } catch(e) { resultElement.textContent = text; }
+        } catch (err) { resultElement.textContent = `Request error: ${err.message}`; }
+      });
+    });
+
+    function generateSampleFromSchema(schema, components) {
+      if (!schema) return {};
+      if (schema['$ref']) {
+        const ref = schema['$ref'].split('/').pop();
+        const def = components && components.schemas ? components.schemas[ref] : null;
+        if (!def) return {};
+        return generateSampleFromSchema(def, components);
+      }
+      if (schema.type === 'object' || schema.properties) {
+        const obj = {};
+        const props = schema.properties || {};
+        for (const [k, v] of Object.entries(props)) {
+          if (v.example !== undefined) obj[k] = v.example;
+          else if (v.default !== undefined) obj[k] = v.default;
+          else if (v.type === 'string') obj[k] = '';
+          else if (v.type === 'integer' || v.type === 'number') obj[k] = 0;
+          else if (v.type === 'boolean') obj[k] = false;
+          else if (v.type === 'array') obj[k] = [generateSampleFromSchema(v.items, components)];
+          else obj[k] = generateSampleFromSchema(v, components);
+        }
+        return obj;
+      }
+      if (schema.type === 'array') return [generateSampleFromSchema(schema.items, components)];
+      if (schema.type === 'string') return '';
+      if (schema.type === 'integer' || schema.type === 'number') return 0;
+      if (schema.type === 'boolean') return false;
+      return {};
+    }
+  </script>
+</body>
+
+</html>

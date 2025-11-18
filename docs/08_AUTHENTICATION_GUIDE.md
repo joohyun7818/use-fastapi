@@ -1,7 +1,7 @@
 # 8단계: JWT 인증 및 사용자 보안
 
 > **목표**: JWT 토큰을 이용한 보안 인증 시스템 구축
->
+> 
 > **학습 시간**: 3-4일
 > **난이도**: ⭐⭐⭐ (중간)
 > **사전 요구사항**: 4단계 완료 (데이터베이스 구축)
@@ -100,7 +100,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import os
 
 # 비밀번호 해싱 설정
@@ -128,7 +128,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 class TokenData(BaseModel):
     """토큰에 포함될 데이터"""
     sub: str  # subject: 사용자 아이디 또는 username
-    scopes: list = []  # 토큰의 스코프 (권한)
+    scopes: list[str] = Field(default_factory=list)  # 토큰의 스코프 (권한)
 
 class Token(BaseModel):
     """로그인 응답 모델"""
@@ -316,17 +316,17 @@ async def get_current_active_user(
     return current_user
 ```
 
-**models.py에 추가**:
+**`src/kaira_fastapi_poetry/models/__init__.py` 에 추가**:
 
 ```python
 # username 필드 추가 (JWT의 sub로 사용)
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)  # ← 추가
+    username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)  # ← 새 이름 (hash_password 대신)
+    hashed_password = Column(String)
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -369,7 +369,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
-from .. import crud, schemas
+from .. import crud, schemas, models
 from ..database import get_db
 from ..security import (
     hash_password,
@@ -380,7 +380,7 @@ from ..security import (
     Token,
 )
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
@@ -458,15 +458,13 @@ async def register_user(
     hashed_password = hash_password(user.password)
     
     # 새 사용자 생성
-    db_user = models.User(
+    db_user = crud.create_user(
+        db,
         username=user.username,
         email=user.email,
         hashed_password=hashed_password,
         full_name=user.full_name
     )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
     
     return db_user
 ```
@@ -475,9 +473,11 @@ async def register_user(
 
 ```python
 # 기존 라우터들 위에 추가
-from .api import auth
+from .api import auth, users, posts
 
-app.include_router(auth.router, prefix="/api")
+app.include_router(auth.router)
+app.include_router(users.router)
+app.include_router(posts.router)
 ```
 
 ---
@@ -487,16 +487,23 @@ app.include_router(auth.router, prefix="/api")
 **`src/kaira_fastapi_poetry/api/users.py` 수정**:
 
 ```python
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from ..database import get_db
+from .. import crud, models
+from ..schemas import UserResponse
 from ..dependencies import get_current_user
 
+router = APIRouter(prefix="/api/users", tags=["users"])
+
 # 현재 사용자 정보 조회 (새 엔드포인트)
-@router.get("/me", response_model=schemas.UserResponse)
+@router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: models.User = Depends(get_current_user)):
     """현재 로그인된 사용자 정보 반환"""
     return current_user
 
 # 기존 get_user 엔드포인트에 인증 추가
-@router.get("/{user_id}", response_model=schemas.UserResponse)
+@router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: int,
     db: Session = Depends(get_db),
@@ -517,6 +524,8 @@ async def get_user(
 
 ```python
 from ..security import REFRESH_TOKEN_EXPIRE_DAYS
+from jose import jwt
+from ..config import settings
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(
@@ -536,7 +545,7 @@ async def refresh_token(
         )
     
     # 토큰 타입 확인
-    payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+    payload = jwt.decode(refresh_token, settings.secret_key, algorithms=[settings.algorithm])
     if payload.get("type") != "refresh":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -563,6 +572,8 @@ async def refresh_token(
         "token_type": "bearer",
         "expires_in": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     }
+
+> 참고: 새 액세스 토큰이 기존 액세스 토큰과 동일하게 보일 경우가 있는데, 이는 액세스 토큰의 payload 및 만료(exp)가 동일한 경우 발생할 수 있습니다. 현재 구현에서는 `iat` 및 `jti`(JWT ID)를 액세스 토큰에 추가하여 항상 새로운 토큰이 발급되도록 보장합니다. (로그인→리프레시 직후 비교 시 토큰 문자열이 바뀌었는지 확인하세요.)
 ```
 
 ---
@@ -572,7 +583,7 @@ async def refresh_token(
 ### 모델 업데이트
 
 ```python
-# models.py에 추가
+# models/__init__.py에 추가
 from enum import Enum
 
 class UserRole(str, Enum):
@@ -582,7 +593,7 @@ class UserRole(str, Enum):
     MODERATOR = "moderator"
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
     
     # 기존 필드들...
     role = Column(String, default=UserRole.USER)  # ← 추가
@@ -645,7 +656,8 @@ async def delete_user(
 # 1. 사용자 등록
 curl -X POST http://localhost:9000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{
+  -d 
+'{ 
     "username": "john_doe",
     "email": "john@example.com",
     "password": "SecurePassword123",
@@ -795,8 +807,7 @@ def test_get_current_user():
 def test_access_without_token():
     """토큰 없이 보호된 엔드포인트 접근 테스트"""
     response = client.get("/api/users/me")
-    assert response.status_code == 403
-    # 또는 401 depending on 구현
+    assert response.status_code == 401
 
 def test_invalid_token():
     """유효하지 않은 토큰으로 접근 테스트"""

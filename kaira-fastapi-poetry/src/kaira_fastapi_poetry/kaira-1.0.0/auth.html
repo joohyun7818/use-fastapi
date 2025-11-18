@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Authentication Console - Kaira</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/vendor.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-light border-bottom py-3">
+    <div class="container">
+      <a class="navbar-brand" href="index.html"><img src="images/main-logo.png" alt="logo"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="auth.html">Auth</a></li>
+          <li class="nav-item"><a class="nav-link" href="users.html">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="system.html">System</a></li>
+          <li class="nav-item"><a class="nav-link" href="tester.html">Tester</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-5">
+    <section class="container">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+              <p class="text-uppercase text-muted mb-2">환경</p>
+              <h5 class="card-title">API 연결 정보</h5>
+              <label for="base-url" class="form-label">Base URL</label>
+              <input id="base-url" class="form-control" autocomplete="off">
+              <p class="small text-muted mt-2">운영 서버(nginx)는 80번 포트에 매핑되어 있으므로 기본값은 <code>http://localhost</code>로 설정됩니다.</p>
+            </div>
+          </div>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <p class="text-uppercase text-muted mb-2">세션 정보</p>
+              <div id="session-status" class="mb-3">
+                <span class="badge bg-secondary">로그인 필요</span>
+                <p class="small text-muted mb-0">먼저 로그인하면 토큰과 프로필이 여기 표시됩니다.</p>
+              </div>
+              <div id="session-profile" class="d-none">
+                <p class="mb-1 fw-semibold" id="session-username"></p>
+                <p class="mb-1" id="session-email"></p>
+                <p class="small text-muted" id="session-role"></p>
+                <button id="logout-btn" class="btn btn-outline-danger btn-sm mt-2">로그아웃</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+              <div class="row g-4">
+                <div class="col-md-6 border-end">
+                  <h5>로그인</h5>
+                  <p class="text-muted small">운영 화면과 동일하게 email/password를 입력하면 토큰이 자동 저장됩니다.</p>
+                  <form id="login-form" data-result-target="login-result">
+                    <div class="mb-3">
+                      <label class="form-label">Email</label>
+                      <input name="login_email" type="email" class="form-control" autocomplete="email" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Password</label>
+                      <input type="password" name="login_password" class="form-control" autocomplete="current-password" required>
+                    </div>
+                    <button class="btn btn-dark w-100" type="submit">로그인</button>
+                  </form>
+                  <pre id="login-result" class="bg-light p-3 rounded mt-3"></pre>
+                </div>
+                <div class="col-md-6">
+                  <h5>회원가입</h5>
+                  <p class="text-muted small">테스트 계정을 만들고 즉시 로그인할 수 있습니다.</p>
+                  <form id="register-form" data-result-target="register-result">
+                    <div class="mb-3">
+                      <label class="form-label">Username</label>
+                      <input name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Email</label>
+                      <input name="email" type="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Password</label>
+                      <input name="password" type="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Full name</label>
+                      <input name="full_name" class="form-control">
+                    </div>
+                    <button class="btn btn-outline-dark w-100" type="submit">회원가입</button>
+                  </form>
+                  <pre id="register-result" class="bg-light p-3 rounded mt-3"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="mb-1">세션 유지</h5>
+                  <p class="text-muted small mb-0">저장된 refresh token을 사용해 access token을 재발급합니다.</p>
+                </div>
+                <span class="badge bg-secondary">/api/auth/refresh</span>
+              </div>
+              <form id="refresh-form" data-result-target="refresh-result" class="mt-3">
+                <div class="mb-3">
+                  <label class="form-label">Refresh token</label>
+                  <textarea name="refresh_token" class="form-control" rows="2" placeholder="자동으로 채워집니다" readonly></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-dark" type="submit">토큰 재발급</button>
+                  <button class="btn btn-outline-secondary" type="button" id="copy-access-btn">Access token 복사</button>
+                </div>
+              </form>
+              <pre id="refresh-result" class="bg-light p-3 rounded mt-3"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-top py-4 mt-5">
+    <div class="container text-center text-md-start">
+      <p class="mb-0">&copy; 2024 Kaira API Portal.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+  <script src="js/api-pages.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      apiHelpers.bindBaseInputs('#base-url');
+
+      const refreshTextarea = document.querySelector('#refresh-form textarea[name="refresh_token"]');
+      const sessionStatus = document.getElementById('session-status');
+      const sessionProfile = document.getElementById('session-profile');
+      const usernameEl = document.getElementById('session-username');
+      const emailEl = document.getElementById('session-email');
+      const roleEl = document.getElementById('session-role');
+
+      function updateSessionCard(snapshot) {
+        const { accessToken, refreshToken, profile } = snapshot;
+        if (refreshTextarea) {
+          refreshTextarea.value = refreshToken || '';
+        }
+        if (accessToken && profile) {
+          sessionStatus.innerHTML = '<span class="badge bg-success">로그인됨</span>';
+          sessionProfile.classList.remove('d-none');
+          usernameEl.textContent = `${profile.full_name || profile.username}`;
+          emailEl.textContent = profile.email;
+          roleEl.textContent = `role: ${profile.role}`;
+        } else if (accessToken) {
+          sessionStatus.innerHTML = '<span class="badge bg-warning text-dark">토큰 저장됨</span><p class="small mb-0">/api/users/me 호출로 프로필을 로드하세요.</p>';
+          sessionProfile.classList.add('d-none');
+        } else {
+          sessionStatus.innerHTML = '<span class="badge bg-secondary">로그인 필요</span>';
+          sessionProfile.classList.add('d-none');
+        }
+      }
+
+      apiHelpers.onAuthChange(updateSessionCard);
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        apiHelpers.clearSession();
+      });
+
+      document.getElementById('copy-access-btn').addEventListener('click', async () => {
+        const token = apiHelpers.getAccessToken();
+        if (!token) return;
+        await navigator.clipboard.writeText(token);
+        alert('클립보드에 복사되었습니다.');
+      });
+
+      apiHelpers.attachForm('register-form', async (form) => {
+        const payload = {
+          username: form.username.value.trim(),
+          email: form.email.value.trim(),
+          password: form.password.value,
+          full_name: form.full_name.value.trim() || null,
+        };
+        return apiHelpers.callApi({ method: 'POST', path: '/api/auth/register', body: payload, withAuth: false });
+      });
+
+      apiHelpers.attachForm('login-form', async (form) => {
+        const payload = {
+          username: form.login_email.value.trim(),
+          password: form.login_password.value,
+        };
+        const result = await apiHelpers.callApi({
+          method: 'POST',
+          path: '/api/auth/token',
+          body: payload,
+          bodyType: 'form',
+          withAuth: false,
+        });
+        apiHelpers.setTokens(result);
+        await apiHelpers.fetchProfile();
+        return { message: '로그인 성공', ...result };
+      });
+
+      apiHelpers.attachForm('refresh-form', async (form) => {
+        const refreshToken = apiHelpers.getRefreshToken() || form.refresh_token.value.trim();
+        if (!refreshToken) {
+          throw new Error('저장된 refresh token이 없습니다. 먼저 로그인하세요.');
+        }
+        const result = await apiHelpers.callApi({
+          method: 'POST',
+          path: '/api/auth/refresh',
+          body: { refresh_token: refreshToken },
+          withAuth: false,
+        });
+        apiHelpers.setTokens({ access_token: result.access_token, refresh_token: refreshToken });
+        await apiHelpers.fetchProfile();
+        return { message: '새 access token 발급', ...result };
+      });
+    });
+  </script>
+</body>
+
+</html>
